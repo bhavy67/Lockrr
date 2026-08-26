@@ -525,7 +525,7 @@ class MockDataClient implements DataClient {
     return URL.createObjectURL(blob);
   }
 
-  async listActivity(limit = 20): Promise<ActivityEvent[]> {
+  async listActivity(limit = 50): Promise<ActivityEvent[]> {
     const user = await currentUserOrThrow();
     return read<ActivityEvent[]>(KEYS.activity(user.id), []).slice(0, limit);
   }

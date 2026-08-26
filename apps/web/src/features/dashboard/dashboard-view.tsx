@@ -1,11 +1,11 @@
 "use client";
 
-import { differenceInCalendarDays, formatDistanceToNow } from "date-fns";
+import { differenceInCalendarDays, formatDistanceToNow, startOfMonth } from "date-fns";
 import {
   Archive,
   CalendarClock,
+  Database,
   FileText,
-  FolderOpen,
   Plus,
   Star,
   UploadCloud,
@@ -19,11 +19,14 @@ import { useSession } from "@/features/auth/use-session";
 import { useUploadDialog } from "@/features/upload/upload-dialog-store";
 import { DocumentRow } from "@/features/documents/document-row";
 import { ExpiryBadge } from "@/features/documents/expiry-badge";
+import { expiryStatus } from "@/features/documents/expiry";
 import {
   useActivity,
   useCategories,
   useDocuments,
 } from "@/features/documents/hooks";
+import { formatBytes } from "@/lib/utils";
+import { CategoryBreakdown } from "./category-breakdown";
 import { StatCard } from "./stat-card";
 
 export function DashboardView() {
@@ -40,23 +43,28 @@ export function DashboardView() {
 
   const stats = useMemo(() => {
     const docs = allDocs ?? [];
-    const now = Date.now();
-    const expiring = docs.filter(
-      (d) =>
-        d.expiryDate &&
-        differenceInCalendarDays(new Date(d.expiryDate), now) <= 30 &&
-        differenceInCalendarDays(new Date(d.expiryDate), now) >= 0,
-    ).length;
-    const expired = docs.filter(
-      (d) =>
-        d.expiryDate &&
-        differenceInCalendarDays(new Date(d.expiryDate), now) < 0,
-    ).length;
-    const favorites = docs.filter((d) => d.isFavorite).length;
-    const categoriesUsed = new Set(
-      docs.map((d) => d.categoryId).filter(Boolean),
-    ).size;
-    return { total: docs.length, expiring, expired, favorites, categoriesUsed };
+    let expiring = 0;
+    let expired = 0;
+    let favorites = 0;
+    let bytes = 0;
+    let thisMonth = 0;
+    const monthStart = startOfMonth(new Date()).getTime();
+    for (const d of docs) {
+      bytes += d.sizeBytes;
+      if (d.isFavorite) favorites++;
+      const s = expiryStatus(d);
+      if (s === "expired") expired++;
+      if (s === "soon") expiring++;
+      if (new Date(d.createdAt).getTime() >= monthStart) thisMonth++;
+    }
+    return {
+      total: docs.length,
+      expiring,
+      expired,
+      favorites,
+      bytes,
+      thisMonth,
+    };
   }, [allDocs]);
 
   const recent = useMemo(() => (allDocs ?? []).slice(0, 5), [allDocs]);
@@ -112,20 +120,34 @@ export function DashboardView() {
             icon={FileText}
             label="Documents"
             value={stats.total}
-            hint={stats.total === 1 ? "1 file stored" : `${stats.total} files stored`}
+            hint={
+              stats.thisMonth > 0
+                ? `${stats.thisMonth} added this month`
+                : "Nothing added this month"
+            }
           />
           <StatCard
-            icon={FolderOpen}
-            label="Categories used"
-            value={stats.categoriesUsed}
-            hint={`of ${categories.length} available`}
+            icon={Database}
+            label="Storage used"
+            value={formatBytes(stats.bytes)}
+            hint={`across ${stats.total} document${stats.total === 1 ? "" : "s"}`}
           />
           <StatCard
             icon={CalendarClock}
-            label="Expiring soon"
-            value={stats.expiring}
-            tint={stats.expiring > 0 ? "warning" : "primary"}
-            hint="in the next 30 days"
+            label={stats.expired > 0 ? "Needs attention" : "Expiring soon"}
+            value={stats.expired + stats.expiring}
+            tint={
+              stats.expired > 0
+                ? "destructive"
+                : stats.expiring > 0
+                  ? "warning"
+                  : "primary"
+            }
+            hint={
+              stats.expired > 0
+                ? `${stats.expired} expired · ${stats.expiring} due soon`
+                : "in the next 30 days"
+            }
           />
           <StatCard
             icon={Star}
@@ -210,15 +232,38 @@ export function DashboardView() {
 
           <section>
             <h2 className="mb-3 text-sm font-semibold text-foreground">
-              Recent activity
+              By category
             </h2>
+            {isLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8" />
+                ))}
+              </div>
+            ) : (
+              <CategoryBreakdown
+                categories={categories}
+                documents={allDocs ?? []}
+              />
+            )}
+          </section>
+
+          <section>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground">
+                Recent activity
+              </h2>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/timeline">Timeline</Link>
+              </Button>
+            </div>
             {!activity || activity.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-surface/50 p-5 text-center text-xs text-muted-foreground">
                 Actions will appear here as you use Lockerr.
               </div>
             ) : (
               <ul className="space-y-2 text-xs">
-                {activity.map((a) => (
+                {activity.slice(0, 6).map((a) => (
                   <li
                     key={a.id}
                     className="flex items-start justify-between gap-3 border-b border-border/50 pb-2 last:border-b-0"

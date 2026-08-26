@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   CheckCircle2,
+  ChevronDown,
   FileText,
   Image as ImageIcon,
   Loader2,
@@ -27,6 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
   Select,
@@ -36,6 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCategories } from "@/features/documents/hooks";
+import { TagPicker } from "@/features/tags/tag-picker";
 import { data } from "@/lib/data";
 import { cn, formatBytes } from "@/lib/utils";
 import { useUploadDialog } from "./upload-dialog-store";
@@ -43,9 +47,19 @@ import { useUploadDialog } from "./upload-dialog-store";
 interface QueueItem {
   id: string;
   file: File;
+  title: string;
   progress: number;
   status: "queued" | "uploading" | "done" | "error";
   error?: string;
+}
+
+function stripExtension(name: string): string {
+  const dot = name.lastIndexOf(".");
+  return dot > 0 ? name.slice(0, dot) : name;
+}
+
+function toIsoOrNull(dateInput: string): string | null {
+  return dateInput ? new Date(dateInput).toISOString() : null;
 }
 
 export function UploadDialog() {
@@ -55,7 +69,11 @@ export function UploadDialog() {
 
   const [items, setItems] = useState<QueueItem[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [tagIds, setTagIds] = useState<string[]>([]);
+  const [documentDate, setDocumentDate] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [showSharedMeta, setShowSharedMeta] = useState(false);
 
   useEffect(() => {
     if (isOpen && initialFiles?.length) {
@@ -64,6 +82,10 @@ export function UploadDialog() {
     if (!isOpen) {
       setItems([]);
       setCategoryId(null);
+      setTagIds([]);
+      setDocumentDate("");
+      setExpiryDate("");
+      setShowSharedMeta(false);
       setUploading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -85,6 +107,7 @@ export function UploadDialog() {
       next.push({
         id: `${f.name}-${f.size}-${Math.random().toString(36).slice(2)}`,
         file: f,
+        title: stripExtension(f.name),
         progress: 0,
         status: "queued",
       });
@@ -108,8 +131,19 @@ export function UploadDialog() {
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const updateItemTitle = (id: string, title: string) => {
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, title } : i)),
+    );
+  };
+
   const startUpload = async () => {
-    if (!items.length) return;
+    const untitled = items.find((i) => !i.title.trim());
+    if (untitled) {
+      toast.error("Give every document a title.");
+      return;
+    }
+
     setUploading(true);
 
     for (const item of items) {
@@ -122,7 +156,11 @@ export function UploadDialog() {
       try {
         await data.uploadDocument({
           file: item.file,
+          title: item.title.trim(),
           categoryId,
+          tagIds: tagIds.length ? tagIds : undefined,
+          documentDate: toIsoOrNull(documentDate),
+          expiryDate: toIsoOrNull(expiryDate),
           onProgress: (pct) => {
             setItems((prev) =>
               prev.map((i) => (i.id === item.id ? { ...i, progress: pct } : i)),
@@ -160,12 +198,15 @@ export function UploadDialog() {
   };
 
   const allDone = items.length > 0 && items.every((i) => i.status === "done");
+  const isSingle = items.length === 1;
 
-  const acceptSummary = useMemo(() => {
-    return ACCEPTED_MIME_TYPES.map((t) => t.split("/")[1]?.toUpperCase())
-      .filter(Boolean)
-      .join(" · ");
-  }, []);
+  const acceptSummary = useMemo(
+    () =>
+      ACCEPTED_MIME_TYPES.map((t) => t.split("/")[1]?.toUpperCase())
+        .filter(Boolean)
+        .join(" · "),
+    [],
+  );
 
   return (
     <Dialog
@@ -176,9 +217,17 @@ export function UploadDialog() {
     >
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Upload documents</DialogTitle>
+          <DialogTitle>
+            {items.length === 0
+              ? "Upload documents"
+              : isSingle
+                ? "Add document details"
+                : `Add ${items.length} documents`}
+          </DialogTitle>
           <DialogDescription>
-            Drop files here or pick from your device. {acceptSummary} up to {formatBytes(MAX_FILE_SIZE_BYTES)}.
+            {items.length === 0
+              ? `Drop files here or pick from your device. ${acceptSummary} up to ${formatBytes(MAX_FILE_SIZE_BYTES)}.`
+              : "Details are optional — you can always edit them later."}
           </DialogDescription>
         </DialogHeader>
 
@@ -200,40 +249,117 @@ export function UploadDialog() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">
+            {/* Queue */}
+            <div className="space-y-2">
               {items.map((item) => (
                 <QueueRow
                   key={item.id}
                   item={item}
                   onRemove={() => removeItem(item.id)}
+                  onTitleChange={(v) => updateItemTitle(item.id, v)}
                   removable={!uploading}
+                  disabled={uploading}
                 />
               ))}
             </div>
 
-            <div className="rounded-md border border-border bg-surface/60 p-3">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Category (applies to all)
-              </label>
-              <Select
-                value={categoryId ?? "none"}
-                onValueChange={(v) => setCategoryId(v === "none" ? null : v)}
-              >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Uncategorized" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Uncategorized</SelectItem>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Metadata */}
+            <div className="rounded-md border border-border bg-surface/40 p-3">
+              {!isSingle && (
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Apply to all files
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowSharedMeta((v) => !v)}
+                    className="focus-ring flex items-center gap-1 rounded p-0.5 text-xs text-muted-foreground hover:text-foreground"
+                    aria-expanded={showSharedMeta}
+                  >
+                    {showSharedMeta ? "Hide dates & tags" : "Add dates & tags"}
+                    <ChevronDown
+                      className={cn(
+                        "h-3 w-3 transition-transform",
+                        showSharedMeta && "rotate-180",
+                      )}
+                    />
+                  </button>
+                </div>
+              )}
+
+              <div className="grid gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Category</Label>
+                  <Select
+                    value={categoryId ?? "none"}
+                    onValueChange={(v) =>
+                      setCategoryId(v === "none" ? null : v)
+                    }
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Uncategorized" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Uncategorized</SelectItem>
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {(isSingle || showSharedMeta) && (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="upload-doc-date" className="text-xs">
+                          Document date
+                          <span className="ml-1 font-normal text-muted-foreground">
+                            (optional)
+                          </span>
+                        </Label>
+                        <Input
+                          id="upload-doc-date"
+                          type="date"
+                          value={documentDate}
+                          onChange={(e) => setDocumentDate(e.target.value)}
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="upload-expiry" className="text-xs">
+                          Expires on
+                          <span className="ml-1 font-normal text-muted-foreground">
+                            (optional)
+                          </span>
+                        </Label>
+                        <Input
+                          id="upload-expiry"
+                          type="date"
+                          value={expiryDate}
+                          onChange={(e) => setExpiryDate(e.target.value)}
+                          className="h-9"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Tags</Label>
+                      <TagPicker
+                        value={tagIds}
+                        onChange={setTagIds}
+                        triggerLabel="Add tag"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
+            {/* Add more */}
             <div
               {...getRootProps()}
               className="flex cursor-pointer items-center justify-center rounded-md border border-dashed border-border py-3 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground"
@@ -245,11 +371,7 @@ export function UploadDialog() {
         )}
 
         <DialogFooter>
-          <Button
-            variant="ghost"
-            onClick={close}
-            disabled={uploading}
-          >
+          <Button variant="ghost" onClick={close} disabled={uploading}>
             {allDone ? "Done" : "Cancel"}
           </Button>
           <Button
@@ -264,7 +386,7 @@ export function UploadDialog() {
             ) : allDone ? (
               "Uploaded"
             ) : (
-              `Upload ${items.length} file${items.length === 1 ? "" : "s"}`
+              `Save & upload ${items.length} file${items.length === 1 ? "" : "s"}`
             )}
           </Button>
         </DialogFooter>
@@ -276,11 +398,15 @@ export function UploadDialog() {
 function QueueRow({
   item,
   onRemove,
+  onTitleChange,
   removable,
+  disabled,
 }: {
   item: QueueItem;
   onRemove: () => void;
+  onTitleChange: (v: string) => void;
   removable: boolean;
+  disabled: boolean;
 }) {
   const isImage = item.file.type.startsWith("image/");
   const Icon = isImage ? ImageIcon : FileText;
@@ -291,13 +417,25 @@ function QueueRow({
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-medium text-foreground">
-            {item.file.name}
-          </p>
-          <span className="text-[11px] text-muted-foreground">
+          <input
+            type="text"
+            value={item.title}
+            onChange={(e) => onTitleChange(e.target.value)}
+            disabled={disabled}
+            aria-label="Document title"
+            placeholder="Give this document a title"
+            className="focus-ring min-w-0 flex-1 truncate rounded-sm border border-transparent bg-transparent px-1 py-0.5 text-sm font-medium text-foreground hover:border-border focus:border-input focus:bg-background"
+          />
+          <span className="shrink-0 text-[11px] text-muted-foreground">
             {formatBytes(item.file.size)}
           </span>
         </div>
+        <p
+          className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground"
+          title={item.file.name}
+        >
+          {item.file.name}
+        </p>
         {item.status === "uploading" && (
           <Progress value={item.progress} className="mt-1.5" />
         )}

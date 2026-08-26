@@ -78,6 +78,10 @@ export function useKeyboardShortcuts() {
             e.preventDefault();
             router.push("/reminders");
             return;
+          case "t":
+            e.preventDefault();
+            router.push("/timeline");
+            return;
           default:
             return;
         }

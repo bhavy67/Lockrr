@@ -1,5 +1,6 @@
 import {
   CalendarClock,
+  Clock,
   FolderOpen,
   Grid2X2,
   LayoutDashboard,
@@ -39,6 +40,12 @@ export const primaryNav: NavItem[] = [
     label: "Collections",
     icon: Library,
     match: (p) => p.startsWith("/collections"),
+  },
+  {
+    href: "/timeline",
+    label: "Timeline",
+    icon: Clock,
+    match: (p) => p.startsWith("/timeline"),
   },
   {
     href: "/reminders",

@@ -3,6 +3,7 @@
 import { differenceInCalendarDays } from "date-fns";
 import {
   CalendarClock,
+  Clock,
   FileText,
   FolderOpen,
   Grid2X2,
@@ -151,6 +152,14 @@ export function CommandPalette() {
             <Library />
             Collections
             <CommandShortcut>G L</CommandShortcut>
+          </CommandItem>
+          <CommandItem
+            value="go timeline"
+            onSelect={() => run(() => router.push("/timeline"))}
+          >
+            <Clock />
+            Timeline
+            <CommandShortcut>G T</CommandShortcut>
           </CommandItem>
         </CommandGroup>
 

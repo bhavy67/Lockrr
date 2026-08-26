@@ -16,6 +16,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useSession, useSignOut } from "@/features/auth/use-session";
+import { useDocuments } from "@/features/documents/hooks";
+import { attentionCount } from "@/features/documents/expiry";
 import { cn, initials } from "@/lib/utils";
 import { primaryNav } from "./nav-items";
 
@@ -26,6 +28,8 @@ export function MobileMenuSheet() {
   const signOut = useSignOut();
   const router = useRouter();
   const pathname = usePathname();
+  const { data: docs = [] } = useDocuments({ archived: false });
+  const attention = attentionCount(docs);
 
   const themes: Array<{ id: "light" | "dark" | "system"; label: string; Icon: typeof Sun }> = [
     { id: "light", label: "Light", Icon: Sun },
@@ -85,7 +89,12 @@ export function MobileMenuSheet() {
                     active ? "text-primary" : "text-muted-foreground",
                   )}
                 />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.href === "/reminders" && attention > 0 && (
+                  <span className="rounded-full bg-warning/15 px-1.5 text-[10px] font-medium text-warning">
+                    {attention}
+                  </span>
+                )}
               </Link>
             );
           })}

@@ -9,20 +9,20 @@ Lockerr is a frontend-first portfolio project that stores, organizes, previews, 
 
 ## Status
 
-The current build ships **Phases 0–3**:
+The current build ships **Phases 0–4**:
 
 - ✅ Monorepo foundation, design system, tokens, dark mode
 - ✅ Auth (mock, local-only): sign up / sign in / sign out with session persistence
 - ✅ Fully responsive shell — desktop sidebar, mobile bottom nav, tablet collapsible sheet
 - ✅ Vault MVP — drag-and-drop upload (multi-file, per-file progress), grid & list views, image + PDF preview with zoom/pan, rename / favorite / archive / delete / download, categorization on upload and edit
-- ✅ Dashboard — real stats (total, categories used, expiring soon, favorites), recent documents, watch dates, activity feed
-- ✅ Expiring view — automatic 60-day window
+- ✅ Dashboard — storage used, uploaded-this-month, needs-attention, favorites; recently added; category breakdown; recent activity linking into timeline
 - ✅ Empty / loading / error states across every page
 - ✅ **Phase 3** — tags (create-on-the-fly, filter, chips on rows), collections (create/rename/delete, detail view, add-to-collection sub-menu), categories browse page with document counts, filter popover on desktop + bottom sheet on mobile, sort dropdown, debounced search
 - ✅ Global **command palette** (⌘K / Ctrl+K): search documents, jump to any collection, upload, view favorites/expiring, navigate sections, lock vault
-- ✅ Keyboard shortcuts: `⌘K` palette · `U` upload · `/` focus vault search · `G` then `D/V/C/L/R` to navigate
+- ✅ Keyboard shortcuts: `⌘K` palette · `U` upload · `/` focus vault search · `G` then `D/V/C/L/R/T` to navigate
+- ✅ **Phase 4** — visual **timeline** grouped by month (uploads, updates, favorites, document dates, expiries, reminders) with sticky headers; **reminders** with Soon / Later / Expired / All tabs, days-remaining prominence, and a summary strip; live count badge on the Expiring nav item
 
-**Roadmap (not yet built):** timeline view, reminders/notifications, custom categories, real Supabase integration, OCR / semantic search / AI features. See [Roadmap](#roadmap).
+**Roadmap (not yet built):** custom categories, real Supabase integration, OCR / semantic search / AI features. See [Roadmap](#roadmap).
 
 ---
 
@@ -176,7 +176,7 @@ Explicit non-goals for the current build: custom cryptography, "zero-knowledge" 
 ## Roadmap
 
 - [x] **Phase 3 — Organize & find**: tags, collections, filters, sorting, command palette (⌘K), keyboard shortcuts
-- [ ] **Phase 4 — Track**: reminders, richer expiry logic, timeline view, activity insights
+- [x] **Phase 4 — Track**: timeline, expired/soon/later reminders, expiry badge in nav, dashboard insights
 - [ ] **Phase 5 — Polish**: motion pass, a11y audit, Vitest for critical logic, Playwright smoke tests, screenshots
 - [ ] **Phase 6 — Real backend**: Supabase Postgres + Storage + Auth, RLS policies, migrations
 - [ ] **Phase 7 — Optional intelligence**: OCR (Tesseract), classification, semantic search (pgvector), Ask Lockerr — all behind a provider abstraction, all opt-in
