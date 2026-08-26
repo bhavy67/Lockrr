@@ -13,7 +13,11 @@ export function formatBytes(bytes: number): string {
     Math.floor(Math.log(bytes) / Math.log(1024)),
   );
   const value = bytes / Math.pow(1024, i);
-  const rounded = value >= 10 || i === 0 ? Math.round(value) : value.toFixed(1);
+  const rounded =
+    value >= 10 || i === 0
+      ? Math.round(value).toString()
+      : // Drop trailing .0 so we render "2 KB" not "2.0 KB"
+        value.toFixed(1).replace(/\.0$/, "");
   return `${rounded} ${units[i]}`;
 }
 

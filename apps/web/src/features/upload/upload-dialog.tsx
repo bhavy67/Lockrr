@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
   CheckCircle2,
@@ -200,6 +201,15 @@ export function UploadDialog() {
   const allDone = items.length > 0 && items.every((i) => i.status === "done");
   const isSingle = items.length === 1;
 
+  const liveStatus = useMemo(() => {
+    if (allDone) return `All ${items.length} documents uploaded.`;
+    if (uploading) {
+      const done = items.filter((i) => i.status === "done").length;
+      return `Uploading document ${done + 1} of ${items.length}.`;
+    }
+    return "";
+  }, [uploading, allDone, items]);
+
   const acceptSummary = useMemo(
     () =>
       ACCEPTED_MIME_TYPES.map((t) => t.split("/")[1]?.toUpperCase())
@@ -216,6 +226,9 @@ export function UploadDialog() {
       }}
     >
       <DialogContent className="max-w-xl">
+        <div className="sr-only" role="status" aria-live="polite">
+          {liveStatus}
+        </div>
         <DialogHeader>
           <DialogTitle>
             {items.length === 0
@@ -311,51 +324,60 @@ export function UploadDialog() {
                   </Select>
                 </div>
 
-                {(isSingle || showSharedMeta) && (
-                  <>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="upload-doc-date" className="text-xs">
-                          Document date
-                          <span className="ml-1 font-normal text-muted-foreground">
-                            (optional)
-                          </span>
-                        </Label>
-                        <Input
-                          id="upload-doc-date"
-                          type="date"
-                          value={documentDate}
-                          onChange={(e) => setDocumentDate(e.target.value)}
-                          className="h-9"
-                        />
+                <AnimatePresence initial={false}>
+                  {(isSingle || showSharedMeta) && (
+                    <motion.div
+                      key="meta"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="grid gap-3 pt-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="upload-doc-date" className="text-xs">
+                            Document date
+                            <span className="ml-1 font-normal text-muted-foreground">
+                              (optional)
+                            </span>
+                          </Label>
+                          <Input
+                            id="upload-doc-date"
+                            type="date"
+                            value={documentDate}
+                            onChange={(e) => setDocumentDate(e.target.value)}
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="upload-expiry" className="text-xs">
+                            Expires on
+                            <span className="ml-1 font-normal text-muted-foreground">
+                              (optional)
+                            </span>
+                          </Label>
+                          <Input
+                            id="upload-expiry"
+                            type="date"
+                            value={expiryDate}
+                            onChange={(e) => setExpiryDate(e.target.value)}
+                            className="h-9"
+                          />
+                        </div>
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="upload-expiry" className="text-xs">
-                          Expires on
-                          <span className="ml-1 font-normal text-muted-foreground">
-                            (optional)
-                          </span>
-                        </Label>
-                        <Input
-                          id="upload-expiry"
-                          type="date"
-                          value={expiryDate}
-                          onChange={(e) => setExpiryDate(e.target.value)}
-                          className="h-9"
-                        />
-                      </div>
-                    </div>
 
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Tags</Label>
-                      <TagPicker
-                        value={tagIds}
-                        onChange={setTagIds}
-                        triggerLabel="Add tag"
-                      />
-                    </div>
-                  </>
-                )}
+                      <div className="mt-3 space-y-1.5">
+                        <Label className="text-xs">Tags</Label>
+                        <TagPicker
+                          value={tagIds}
+                          onChange={setTagIds}
+                          triggerLabel="Add tag"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 

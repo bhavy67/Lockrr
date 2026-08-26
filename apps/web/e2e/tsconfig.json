@@ -1,0 +1,9 @@
+{
+  "extends": "@lockerr/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "noEmit": true,
+    "jsx": "preserve"
+  },
+  "include": ["**/*.ts"]
+}

@@ -12,7 +12,7 @@ import { useUploadDialog } from "@/features/upload/upload-dialog-store";
 import { useTags } from "@/features/tags/hooks";
 import { useDebounced } from "@/lib/hooks/use-debounced";
 import { useCategories, useDocuments } from "./hooks";
-import { DocumentCard } from "./document-card";
+import { DocumentGrid } from "./document-grid";
 import { DocumentRow } from "./document-row";
 import {
   VaultFilters,
@@ -187,15 +187,7 @@ export function VaultView({
           />
         )
       ) : view === "grid" ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-          {documents.map((d) => (
-            <DocumentCard
-              key={d.id}
-              document={d}
-              category={d.categoryId ? categoryMap.get(d.categoryId) : undefined}
-            />
-          ))}
-        </div>
+        <DocumentGrid documents={documents} categoryMap={categoryMap} />
       ) : (
         <div className="space-y-1 rounded-lg border border-border bg-card p-1">
           {documents.map((d) => (

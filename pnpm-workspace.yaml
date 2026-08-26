@@ -5,9 +5,11 @@ packages:
 # Explicitly allow install scripts for these native packages.
 # Required by pnpm 11's supply-chain policy.
 allowBuilds:
+  esbuild: true
   sharp: true
   unrs-resolver: true
 
 onlyBuiltDependencies:
+  - esbuild
   - sharp
   - unrs-resolver

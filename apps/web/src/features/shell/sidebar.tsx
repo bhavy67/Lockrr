@@ -20,7 +20,10 @@ export function Sidebar() {
   const attention = attentionCount(docs);
 
   return (
-    <aside className="hidden h-svh w-60 shrink-0 flex-col border-r border-border bg-surface/40 md:flex">
+    <aside
+      aria-label="Sidebar"
+      className="hidden h-svh w-60 shrink-0 flex-col border-r border-border bg-surface/40 md:flex"
+    >
       <div className="flex h-14 items-center px-4">
         <Link href="/dashboard" className="focus-ring rounded-md">
           <Wordmark />
@@ -42,7 +45,7 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <nav className="mt-4 flex-1 space-y-0.5 px-3">
+      <nav aria-label="Primary" className="mt-4 flex-1 space-y-0.5 px-3">
         {primaryNav.map((item) => {
           const active = item.match ? item.match(pathname) : pathname === item.href;
           const showBadge = item.href === "/reminders" && attention > 0;

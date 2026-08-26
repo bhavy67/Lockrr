@@ -9,7 +9,7 @@ Lockerr is a frontend-first portfolio project that stores, organizes, previews, 
 
 ## Status
 
-The current build ships **Phases 0–4**:
+The current build ships **Phases 0–5**:
 
 - ✅ Monorepo foundation, design system, tokens, dark mode
 - ✅ Auth (mock, local-only): sign up / sign in / sign out with session persistence
@@ -21,6 +21,7 @@ The current build ships **Phases 0–4**:
 - ✅ Global **command palette** (⌘K / Ctrl+K): search documents, jump to any collection, upload, view favorites/expiring, navigate sections, lock vault
 - ✅ Keyboard shortcuts: `⌘K` palette · `U` upload · `/` focus vault search · `G` then `D/V/C/L/R/T` to navigate
 - ✅ **Phase 4** — visual **timeline** grouped by month (uploads, updates, favorites, document dates, expiries, reminders) with sticky headers; **reminders** with Soon / Later / Expired / All tabs, days-remaining prominence, and a summary strip; live count badge on the Expiring nav item
+- ✅ **Phase 5 — Polish** — motion pass (Framer Motion stagger on the document grid, animated expand for upload metadata, favorite-star spring pop), a11y pass (skip-link, `aria-live` upload status, sidebar landmarks, always-visible actions on touch), **Vitest** suite (26 tests) covering utils/expiry/timeline helpers, **Playwright** smoke tests for signup + keyboard shortcut flow
 
 **Roadmap (not yet built):** custom categories, real Supabase integration, OCR / semantic search / AI features. See [Roadmap](#roadmap).
 
@@ -84,6 +85,25 @@ lockerr/
 
 ---
 
+## Screenshots
+
+Place captures in `docs/screenshots/` and reference them here.
+
+| View          | Path                                  |
+| ------------- | ------------------------------------- |
+| Landing       | `docs/screenshots/landing.png`        |
+| Dashboard     | `docs/screenshots/dashboard.png`      |
+| Vault (grid)  | `docs/screenshots/vault-grid.png`     |
+| Document      | `docs/screenshots/document.png`       |
+| Timeline      | `docs/screenshots/timeline.png`       |
+| Reminders     | `docs/screenshots/reminders.png`      |
+| Command palette | `docs/screenshots/palette.png`      |
+| Mobile        | `docs/screenshots/mobile.png`         |
+
+Suggested capture size: **1440×900** for desktop views, **390×844** (iPhone 14) for mobile.
+
+---
+
 ## Local development
 
 **Requirements:** Node.js ≥ 20, pnpm 11 (via corepack: `corepack enable && corepack prepare pnpm@latest --activate`).
@@ -104,6 +124,20 @@ pnpm start         # start production server
 pnpm typecheck     # tsc across all packages
 pnpm lint          # ESLint on the web app
 ```
+
+### Testing
+
+```bash
+# Unit tests — pure helpers (utils, expiry, timeline). Fast, no browser.
+pnpm --filter @lockerr/web test
+pnpm --filter @lockerr/web test:watch
+
+# End-to-end (Playwright + Chromium). One-time browser install:
+pnpm --filter @lockerr/web e2e:install
+pnpm --filter @lockerr/web e2e
+```
+
+E2E tests boot their own Next server on port 3100, sign a new user up (mock auth, no cleanup needed — each test gets an isolated browser context), and verify a couple of core flows. Extend `apps/web/e2e/*.spec.ts` as new critical paths land.
 
 ### Environment variables
 
@@ -177,7 +211,7 @@ Explicit non-goals for the current build: custom cryptography, "zero-knowledge" 
 
 - [x] **Phase 3 — Organize & find**: tags, collections, filters, sorting, command palette (⌘K), keyboard shortcuts
 - [x] **Phase 4 — Track**: timeline, expired/soon/later reminders, expiry badge in nav, dashboard insights
-- [ ] **Phase 5 — Polish**: motion pass, a11y audit, Vitest for critical logic, Playwright smoke tests, screenshots
+- [x] **Phase 5 — Polish**: motion pass, a11y improvements, Vitest suite (26 tests), Playwright smoke tests, screenshots scaffold
 - [ ] **Phase 6 — Real backend**: Supabase Postgres + Storage + Auth, RLS policies, migrations
 - [ ] **Phase 7 — Optional intelligence**: OCR (Tesseract), classification, semantic search (pgvector), Ask Lockerr — all behind a provider abstraction, all opt-in
 

@@ -17,7 +17,11 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 
   if (isLoading || !user) {
     return (
-      <div className="flex min-h-svh items-center justify-center">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex min-h-svh items-center justify-center"
+      >
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <LogoMark className="animate-pulse" size={28} />
           <p className="text-xs">Opening your vault…</p>
