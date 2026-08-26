@@ -36,7 +36,7 @@ export function CollectionsView() {
             Group documents that belong together.
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={() => setDialogOpen(true)} aria-label="New collection">
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">New collection</span>
         </Button>
@@ -68,7 +68,7 @@ export function CollectionsView() {
               <Link
                 key={c.id}
                 href={`/collections/${c.id}`}
-                className="focus-ring group flex flex-col justify-between rounded-lg border border-border bg-card p-5 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated"
+                className="focus-ring group flex min-w-0 flex-col justify-between rounded-lg border border-border bg-card p-5 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated"
               >
                 <div className="flex items-start gap-3">
                   <div

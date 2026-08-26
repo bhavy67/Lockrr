@@ -52,7 +52,7 @@ export function CategoriesView() {
           <Link
             key={c.id}
             href={`/vault?category=${c.id}`}
-            className="focus-ring group flex items-center gap-4 rounded-lg border border-border bg-card p-4 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated"
+            className="focus-ring group flex min-w-0 items-center gap-4 rounded-lg border border-border bg-card p-4 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated"
           >
             <div
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-white"

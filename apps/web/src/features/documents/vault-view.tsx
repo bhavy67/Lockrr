@@ -118,6 +118,7 @@ export function VaultView({
               size="sm"
               onClick={() => setFavoritesOnly((v) => !v)}
               aria-pressed={favoritesOnly}
+              aria-label="Favorites"
             >
               <Star
                 className={cn(

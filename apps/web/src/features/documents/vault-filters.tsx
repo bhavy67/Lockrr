@@ -149,7 +149,13 @@ function MobileFilterSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label={
+            activeCount ? `${activeCount} filters active` : "Open filters"
+          }
+        >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           {activeCount > 0 && (
             <span className="ml-1 rounded-sm bg-primary/15 px-1.5 text-[10px] font-medium text-primary">

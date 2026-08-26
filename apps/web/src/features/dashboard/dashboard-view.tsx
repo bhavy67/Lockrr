@@ -160,7 +160,7 @@ export function DashboardView() {
       )}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section>
+        <section className="min-w-0">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
               Recently added
@@ -197,7 +197,7 @@ export function DashboardView() {
           )}
         </section>
 
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6">
           <section>
             <h2 className="mb-3 text-sm font-semibold text-foreground">
               Watch dates
@@ -268,7 +268,7 @@ export function DashboardView() {
                     key={a.id}
                     className="flex items-start justify-between gap-3 border-b border-border/50 pb-2 last:border-b-0"
                   >
-                    <span className="text-muted-foreground">
+                    <span className="min-w-0 text-muted-foreground">
                       {describeActivity(a.kind)}{" "}
                       {typeof a.payload.title === "string" && (
                         <span className="font-medium text-foreground">

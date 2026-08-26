@@ -215,6 +215,52 @@ aliases get the implicit index signature that satisfies it. Turn one into an
 interface and every query silently degrades to `never` with a wall of
 confusing errors.
 
+### 9. `grid`/`flex` items need `min-w-0` wherever content can be long
+
+A flex or grid item's default `min-width` is `auto`, not `0` — it refuses to
+shrink below its content's natural (max-content) size. Give it unbreakable
+content (a document title, a collection name, an activity description next
+to a fixed-width timestamp) and the item just grows past its container
+instead of wrapping or truncating, forcing the whole page wider than the
+viewport. `truncate` on a *descendant* does nothing if some ancestor between
+it and the flex/grid boundary hasn't zeroed its own min-width — each nesting
+level needs it independently. Tailwind's numbered `grid-cols-N` utilities
+already bake in `minmax(0, 1fr)`, so they're safe; a bare `grid` relying on
+the implicit single auto column below its breakpoint (`grid gap-3
+sm:grid-cols-2`, common for card grids that go single-column on mobile) is
+not — add `min-w-0` to the item. Caught this live on the dashboard's
+"Recent activity" list, and the same pattern was lurking in the categories
+and collections card grids. Test with a document/collection/tag name much
+longer than any of the seed data — short fixture strings never trigger it.
+
+### 10. The base `Dialog` had no viewport-height cap until this was found
+
+`DialogContent` centers via `top-[50%] translate-y-[-50%]` with no
+`max-height` or `overflow-y`. Fine as long as a dialog's content is shorter
+than the viewport; once it isn't — the upload dialog with several files
+queued, on a short viewport or with a keyboard open — the dialog simply
+renders past the top and bottom edges with nothing scrollable to reach the
+clipped parts, including the close button. Fixed by capping the base
+component at `max-h-[85vh] overflow-y-auto` (matching the `max-h-[85vh]`
+already used by the mobile filter sheet), so every dialog built on it inherits
+the safety net. A component-specific override that sets its own `overflow`
+(only `CommandDialog` does, since its `CommandList` scrolls internally) still
+needs its own max-height sanity check on a short viewport — don't assume the
+base fix reaches through it.
+
+### 11. Icon-only responsive buttons need their own `aria-label`
+
+The `hidden sm:inline` pattern (show a label at `sm:` and up, icon-only
+below) is used in a few places to save space on mobile. Every one of them
+needs an `aria-label` on the `Button` itself — the visible text disappearing
+below the breakpoint doesn't remove the requirement for an accessible name,
+it just makes the icon the only thing left, and an icon alone isn't one. Three
+instances shipped without it (vault filters trigger, vault favorites toggle,
+collections "new collection" button) before this was caught; the vault sort
+button was already doing this right by swapping in short fallback text
+(`sm:hidden` → "Sort") instead of hiding it outright — prefer that pattern
+when there's room for even an abbreviated label.
+
 ---
 
 ## Phase 6 — what shipped
