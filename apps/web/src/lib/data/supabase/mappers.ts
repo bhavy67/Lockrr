@@ -6,6 +6,9 @@ import type {
   DocumentFileKind,
   DocumentRecord,
   DocumentSort,
+  DocumentText,
+  ExtractionMethod,
+  ExtractionStatus,
   Reminder,
   Tag,
   User,
@@ -17,6 +20,7 @@ import type {
   CollectionRow,
   DocumentRow,
   DocumentRowWithJoins,
+  DocumentTextRow,
   ProfileRow,
   ReminderRow,
   TagRow,
@@ -133,6 +137,17 @@ export function toActivity(row: ActivityRow): ActivityEvent {
     kind: row.kind as ActivityKind,
     payload: row.payload ?? {},
     createdAt: toIsoRequired(row.created_at),
+  };
+}
+
+export function toDocumentText(row: DocumentTextRow): DocumentText {
+  return {
+    documentId: row.document_id,
+    status: row.status as ExtractionStatus,
+    content: row.content,
+    characterCount: row.character_count,
+    extractionMethod: row.extraction_method as ExtractionMethod | null,
+    extractedAt: toIso(row.extracted_at),
   };
 }
 

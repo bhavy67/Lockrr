@@ -8,13 +8,19 @@ import type {
   DocumentFilters,
   DocumentRecord,
   DocumentSort,
+  DocumentText,
   Reminder,
   Tag,
   User,
 } from "@lockerr/types";
 
 import { sanitizeFileName, sleep, stripExtension } from "@/lib/utils";
-import type { AuthResult, DataClient, UploadInput } from "./client";
+import type {
+  AuthResult,
+  DataClient,
+  SaveDocumentTextInput,
+  UploadInput,
+} from "./client";
 import { deleteFile, getFile, putFile } from "./mock-storage";
 
 const KEYS = {
@@ -25,6 +31,7 @@ const KEYS = {
   collections: (uid: string) => `lockerr.collections.${uid}`,
   documents: (uid: string) => `lockerr.documents.${uid}`,
   activity: (uid: string) => `lockerr.activity.${uid}`,
+  documentTexts: (uid: string) => `lockerr.document_texts.${uid}`,
 } as const;
 
 type StoredUser = User & { passwordHash: string };
@@ -514,6 +521,14 @@ class MockDataClient implements DataClient {
       KEYS.documents(user.id),
       docs.filter((d) => d.id !== id),
     );
+    const texts = read<Record<string, DocumentText>>(
+      KEYS.documentTexts(user.id),
+      {},
+    );
+    if (texts[id]) {
+      delete texts[id];
+      write(KEYS.documentTexts(user.id), texts);
+    }
     logActivity(user.id, "document.deleted", id, { title: doc.title });
   }
 
@@ -541,6 +556,43 @@ class MockDataClient implements DataClient {
 
   async listReminders(): Promise<Reminder[]> {
     return [];
+  }
+
+  // ---- Extraction (Phase 7.1) ----
+
+  async getDocumentText(documentId: string): Promise<DocumentText | null> {
+    const user = await currentUserOrThrow();
+    const map = read<Record<string, DocumentText>>(
+      KEYS.documentTexts(user.id),
+      {},
+    );
+    return map[documentId] ?? null;
+  }
+
+  async saveDocumentText(
+    input: SaveDocumentTextInput,
+  ): Promise<DocumentText> {
+    const user = await currentUserOrThrow();
+    const map = read<Record<string, DocumentText>>(
+      KEYS.documentTexts(user.id),
+      {},
+    );
+    const now = new Date().toISOString();
+    const isFinal =
+      input.status === "done" ||
+      input.status === "empty" ||
+      input.status === "failed";
+    const record: DocumentText = {
+      documentId: input.documentId,
+      status: input.status,
+      content: input.content,
+      characterCount: input.content?.length ?? 0,
+      extractionMethod: input.extractionMethod,
+      extractedAt: isFinal ? now : (map[input.documentId]?.extractedAt ?? null),
+    };
+    map[input.documentId] = record;
+    write(KEYS.documentTexts(user.id), map);
+    return record;
   }
 }
 

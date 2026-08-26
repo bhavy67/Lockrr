@@ -4,6 +4,9 @@ import type {
   Collection,
   DocumentFilters,
   DocumentRecord,
+  DocumentText,
+  ExtractionMethod,
+  ExtractionStatus,
   Reminder,
   Tag,
   User,
@@ -82,4 +85,15 @@ export interface DataClient {
 
   // ---- Reminders ----
   listReminders(): Promise<Reminder[]>;
+
+  // ---- Extraction (Phase 7.1) ----
+  getDocumentText(documentId: string): Promise<DocumentText | null>;
+  saveDocumentText(input: SaveDocumentTextInput): Promise<DocumentText>;
+}
+
+export interface SaveDocumentTextInput {
+  documentId: string;
+  status: ExtractionStatus;
+  content: string | null;
+  extractionMethod: ExtractionMethod | null;
 }

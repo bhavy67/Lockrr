@@ -110,6 +110,18 @@ export type DocumentRowWithJoins = DocumentRow & {
   collection_documents: Array<{ collection_id: string }> | null;
 };
 
+export type DocumentTextRow = {
+  document_id: string;
+  user_id: string;
+  status: "not_extracted" | "processing" | "done" | "empty" | "failed";
+  content: string | null;
+  character_count: number;
+  extraction_method: "pdf-embedded" | "ocr-image" | "ocr-pdf" | null;
+  extracted_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type Table<Row, Insert, Update = Partial<Row>> = {
   Row: Row;
   Insert: Insert;
@@ -163,6 +175,10 @@ export interface Database {
         Insertable<ReminderRow, "user_id" | "document_id" | "remind_at">
       >;
       activity: Table<ActivityRow, Insertable<ActivityRow, "user_id" | "kind">>;
+      document_texts: Table<
+        DocumentTextRow,
+        Insertable<DocumentTextRow, "document_id" | "user_id" | "status">
+      >;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

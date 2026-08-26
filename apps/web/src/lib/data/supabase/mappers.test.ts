@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { DocumentRowWithJoins } from "./database.types";
+import type {
+  DocumentRowWithJoins,
+  DocumentTextRow,
+} from "./database.types";
 import {
   activityKindForPatch,
   documentIdsWithAllTags,
@@ -8,6 +11,7 @@ import {
   orderFor,
   toDocument,
   toDocumentPatch,
+  toDocumentText,
   toIso,
 } from "./mappers";
 
@@ -236,5 +240,58 @@ describe("documentIdsWithAllTags", () => {
 
   it("is empty when no document carries the whole set", () => {
     expect(documentIdsWithAllTags(rows, ["t1", "t2", "t3"])).toEqual([]);
+  });
+});
+
+describe("toDocumentText", () => {
+  const baseRow: DocumentTextRow = {
+    document_id: "doc-1",
+    user_id: "user-1",
+    status: "done",
+    content: "Passport valid until 2035",
+    character_count: 26,
+    extraction_method: "pdf-embedded",
+    extracted_at: "2026-08-27T00:00:00+00:00",
+    created_at: "2026-08-27T00:00:00+00:00",
+    updated_at: "2026-08-27T00:00:00+00:00",
+  };
+
+  it("maps snake_case columns to camelCase domain", () => {
+    expect(toDocumentText(baseRow)).toEqual({
+      documentId: "doc-1",
+      status: "done",
+      content: "Passport valid until 2035",
+      characterCount: 26,
+      extractionMethod: "pdf-embedded",
+      extractedAt: "2026-08-27T00:00:00.000Z",
+    });
+  });
+
+  it("normalizes extracted_at through toIso", () => {
+    const mapped = toDocumentText({
+      ...baseRow,
+      extracted_at: "2026-08-27T00:00:00+00:00",
+    });
+    // Two different timezone forms of the same instant become identical strings.
+    expect(mapped.extractedAt).toBe(
+      toDocumentText({
+        ...baseRow,
+        extracted_at: "2026-08-27T00:00:00.000Z",
+      }).extractedAt,
+    );
+  });
+
+  it("propagates null content + method on failure rows", () => {
+    const mapped = toDocumentText({
+      ...baseRow,
+      status: "failed",
+      content: null,
+      extraction_method: null,
+      extracted_at: null,
+    });
+    expect(mapped.content).toBeNull();
+    expect(mapped.extractionMethod).toBeNull();
+    expect(mapped.extractedAt).toBeNull();
+    expect(mapped.status).toBe("failed");
   });
 });

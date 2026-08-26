@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCategories } from "@/features/documents/hooks";
+import { useExtractionQueue } from "@/features/extraction/queue";
 import { TagPicker } from "@/features/tags/tag-picker";
 import { data } from "@/lib/data";
 import { cn, formatBytes, stripExtension } from "@/lib/utils";
@@ -62,6 +63,7 @@ export function UploadDialog() {
   const { isOpen, close, initialFiles } = useUploadDialog();
   const { data: categories = [] } = useCategories();
   const qc = useQueryClient();
+  const enqueueExtraction = useExtractionQueue((s) => s.enqueue);
 
   const [items, setItems] = useState<QueueItem[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -150,7 +152,7 @@ export function UploadDialog() {
         ),
       );
       try {
-        await data.uploadDocument({
+        const uploaded = await data.uploadDocument({
           file: item.file,
           title: item.title.trim(),
           categoryId,
@@ -168,6 +170,13 @@ export function UploadDialog() {
             i.id === item.id ? { ...i, status: "done", progress: 100 } : i,
           ),
         );
+        // Kick off extraction with the original File object — no re-download.
+        // Fire-and-forget: the queue owns retries, status writes, and toasts.
+        enqueueExtraction({
+          documentId: uploaded.id,
+          file: item.file,
+          title: uploaded.title,
+        });
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Couldn't upload this document.";

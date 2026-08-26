@@ -8,13 +8,19 @@ import type {
   Collection,
   DocumentFilters,
   DocumentRecord,
+  DocumentText,
   Reminder,
   Tag,
   User,
 } from "@lockerr/types";
 
 import { sanitizeFileName, stripExtension } from "@/lib/utils";
-import type { AuthResult, DataClient, UploadInput } from "./client";
+import type {
+  AuthResult,
+  DataClient,
+  SaveDocumentTextInput,
+  UploadInput,
+} from "./client";
 import {
   DOCUMENTS_BUCKET,
   getSupabase,
@@ -33,6 +39,7 @@ import {
   toCollection,
   toDocument,
   toDocumentPatch,
+  toDocumentText,
   toReminder,
   toTag,
   toUser,
@@ -645,6 +652,47 @@ class SupabaseDataClient implements DataClient {
       .order("remind_at", { ascending: true });
     if (error) fail("Couldn't load reminders", error);
     return data.map(toReminder);
+  }
+
+  // ---- Extraction (Phase 7.1) ---------------------------------------------
+
+  async getDocumentText(documentId: string): Promise<DocumentText | null> {
+    await this.requireUserId();
+    const { data, error } = await this.sb
+      .from("document_texts")
+      .select("*")
+      .eq("document_id", documentId)
+      .maybeSingle();
+    if (error) fail("Couldn't load extracted text", error);
+    return data ? toDocumentText(data) : null;
+  }
+
+  async saveDocumentText(
+    input: SaveDocumentTextInput,
+  ): Promise<DocumentText> {
+    const userId = await this.requireUserId();
+    const isFinal =
+      input.status === "done" ||
+      input.status === "empty" ||
+      input.status === "failed";
+    const { data, error } = await this.sb
+      .from("document_texts")
+      .upsert(
+        {
+          document_id: input.documentId,
+          user_id: userId,
+          status: input.status,
+          content: input.content,
+          character_count: input.content?.length ?? 0,
+          extraction_method: input.extractionMethod,
+          extracted_at: isFinal ? new Date().toISOString() : null,
+        },
+        { onConflict: "document_id" },
+      )
+      .select("*")
+      .single();
+    if (error) fail("Couldn't save extracted text", error);
+    return toDocumentText(data);
   }
 }
 

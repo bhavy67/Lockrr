@@ -3,6 +3,7 @@ import { SkipLink } from "@/components/skip-link";
 import { AuthGuard } from "@/features/auth/auth-guard";
 import { CommandPalette } from "@/features/command-palette/command-palette";
 import { ShortcutsMount } from "@/features/command-palette/shortcuts-mount";
+import { ExtractionQueueMount } from "@/features/extraction/queue-mount";
 import { MobileBottomNav, MobileTopBar } from "@/features/shell/mobile-nav";
 import { Sidebar } from "@/features/shell/sidebar";
 import { UploadDialog } from "@/features/upload/upload-dialog";
@@ -24,6 +25,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <UploadDialog />
       <CommandPalette />
       <ShortcutsMount />
+      <ExtractionQueueMount />
     </AuthGuard>
   );
 }

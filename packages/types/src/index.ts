@@ -132,3 +132,27 @@ export interface DocumentFilters {
   expiringWithinDays?: number;
   sort?: DocumentSort;
 }
+
+// ---- Extraction (Phase 7.1) ----
+
+export type ExtractionStatus =
+  | "not_extracted"
+  | "processing"
+  | "done"
+  | "empty"
+  | "failed";
+
+export type ExtractionMethod = "pdf-embedded" | "ocr-image" | "ocr-pdf";
+
+/**
+ * The textual content of a document, extracted client-side by PDF.js or
+ * Tesseract. One row per document. `content` is null unless status is "done".
+ */
+export interface DocumentText {
+  documentId: UUID;
+  status: ExtractionStatus;
+  content: string | null;
+  characterCount: number;
+  extractionMethod: ExtractionMethod | null;
+  extractedAt: ISODate | null;
+}

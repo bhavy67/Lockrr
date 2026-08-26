@@ -21,10 +21,11 @@ The current build ships **Phases 0–6**:
 - ✅ Global **command palette** (⌘K / Ctrl+K): search documents, jump to any collection, upload, view favorites/expiring, navigate sections, lock vault
 - ✅ Keyboard shortcuts: `⌘K` palette · `U` upload · `/` focus vault search · `G` then `D/V/C/L/R/T` to navigate
 - ✅ **Phase 4** — visual **timeline** grouped by month (uploads, updates, favorites, document dates, expiries, reminders) with sticky headers; **reminders** with Soon / Later / Expired / All tabs, days-remaining prominence, and a summary strip; live count badge on the Expiring nav item
-- ✅ **Phase 5 — Polish** — motion pass (Framer Motion stagger on the document grid, animated expand for upload metadata, favorite-star spring pop), a11y pass (skip-link, `aria-live` upload status, sidebar landmarks, always-visible actions on touch), **Vitest** suite (59 tests) covering utils/expiry/timeline/mapper helpers, **Playwright** smoke tests for signup + keyboard shortcut flow
+- ✅ **Phase 5 — Polish** — motion pass (Framer Motion stagger on the document grid, animated expand for upload metadata, favorite-star spring pop), a11y pass (skip-link, `aria-live` upload status, sidebar landmarks, always-visible actions on touch), **Vitest** suite (67 tests) covering utils/expiry/timeline/mapper helpers, **Playwright** smoke tests for signup + keyboard shortcut flow
 - ✅ **Phase 6 — Real backend** — Supabase Postgres, Auth and Storage behind `NEXT_PUBLIC_DATA_MODE=supabase`; migrations with row level security on every table, a private bucket reachable only through short-lived signed URLs, real per-file upload progress. The browser-local mock stays the default and the first-run experience.
+- ✅ **Phase 7.1 — Text extraction** — Every document uploaded now gets its text extracted client-side: PDF.js reads embedded text layers, Tesseract.js OCRs images, all off the main thread. A new **Content** tab on document detail shows the extracted text with copy + re-extract actions. Storage lives in a new `document_texts` table with a GIN-indexed `tsvector` column, reserved for the semantic search work coming in 7.4.
 
-**Roadmap (not yet built):** custom categories, OCR / semantic search / AI features. See [Roadmap](#roadmap).
+**Roadmap (not yet built):** AI-suggested metadata (7.2), auto-classify on upload (7.3), semantic search via pgvector (7.4), Ask Lockerr RAG (7.5), custom categories. See [Roadmap](#roadmap).
 
 ---
 
@@ -254,7 +255,11 @@ prove.
 - [x] **Phase 4 — Track**: timeline, expired/soon/later reminders, expiry badge in nav, dashboard insights
 - [x] **Phase 5 — Polish**: motion pass, a11y improvements, Vitest suite, Playwright smoke tests, screenshots scaffold
 - [x] **Phase 6 — Real backend**: Supabase Postgres + Storage + Auth, RLS policies, migrations
-- [ ] **Phase 7 — Optional intelligence**: OCR (Tesseract), classification, semantic search (pgvector), Ask Lockerr — all behind a provider abstraction, all opt-in
+- [x] **Phase 7.1 — Text extraction**: client-side PDF.js + Tesseract.js, `document_texts` table, Content tab
+- [ ] **Phase 7.2 — Suggested metadata**: `AiProvider` abstraction (Anthropic implementation), "Suggest details" review flow
+- [ ] **Phase 7.3 — Auto-classify on upload**
+- [ ] **Phase 7.4 — Semantic search (pgvector)**
+- [ ] **Phase 7.5 — Ask Lockerr (RAG Q&A)**
 
 Each phase is designed to leave the app in a shippable, working state.
 
