@@ -8,6 +8,7 @@ import {
   orderFor,
   toDocument,
   toDocumentPatch,
+  toIso,
 } from "./mappers";
 
 const row: DocumentRowWithJoins = {
@@ -32,6 +33,24 @@ const row: DocumentRowWithJoins = {
   collection_documents: [{ collection_id: "col-1" }],
 };
 
+describe("toIso", () => {
+  it("normalizes the Postgres offset form to the shape the mock produces", () => {
+    expect(toIso("2026-09-10T00:00:00+00:00")).toBe("2026-09-10T00:00:00.000Z");
+  });
+
+  it("leaves an already-normalized value unchanged", () => {
+    expect(toIso("2026-09-10T00:00:00.000Z")).toBe("2026-09-10T00:00:00.000Z");
+  });
+
+  it("passes null through", () => {
+    expect(toIso(null)).toBeNull();
+  });
+
+  it("returns unparseable input as-is rather than throwing", () => {
+    expect(toIso("not a date")).toBe("not a date");
+  });
+});
+
 describe("toDocument", () => {
   it("flattens join rows into id arrays", () => {
     const doc = toDocument(row);
@@ -55,6 +74,18 @@ describe("toDocument", () => {
     expect(doc.isFavorite).toBe(true);
     expect(doc.sizeBytes).toBe(1024);
     expect(doc.expiryDate).toBe("2030-01-01T00:00:00.000Z");
+  });
+
+  it("normalizes the timestamps Postgres returns", () => {
+    const doc = toDocument({
+      ...row,
+      expiry_date: "2030-01-01T00:00:00+00:00",
+      created_at: "2024-01-01T09:30:00+00:00",
+    });
+    // The document form compares these strings to decide whether it is dirty,
+    // so they have to match what the mock client would have stored.
+    expect(doc.expiryDate).toBe("2030-01-01T00:00:00.000Z");
+    expect(doc.createdAt).toBe("2024-01-01T09:30:00.000Z");
   });
 });
 

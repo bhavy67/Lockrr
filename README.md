@@ -228,7 +228,9 @@ boundary, not a second line of defence behind one.
 - Supabase Auth for identity. Tokens are refreshed in middleware and verified
   by Postgres on every request.
 - RLS enabled on all nine tables, each with the same policy shape:
-  `user_id = auth.uid()` for select, insert, update and delete.
+  `user_id = (select auth.uid())` for select, insert, update and delete. `anon`
+  has no table grants at all — verified against a real hosted project, whose
+  default privileges hand `anon` full CRUD otherwise.
 - Private storage bucket. Object policies compare the first segment of
   `${user_id}/${uuid}-${filename}` against `auth.uid()`, so the path prefix is
   the boundary rather than a convention.

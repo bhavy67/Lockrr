@@ -223,9 +223,11 @@ Real Supabase, gated behind `NEXT_PUBLIC_DATA_MODE=supabase`. The mock client
 is untouched and still the default.
 
 - **Migrations** in `supabase/migrations/` — nine tables, each with `user_id`
-  and four RLS policies (`user_id = auth.uid()`). A trigger on `auth.users`
-  seeds the profile and the eleven default categories in the same transaction
-  as the account. `search_tsv` + GIN index exist but nothing reads them yet.
+  and four RLS policies (`user_id = (select auth.uid())`). A trigger on
+  `auth.users` seeds the profile and the eleven default categories in the same
+  transaction as the account. `search_tsv` + GIN index exist but nothing reads
+  them yet. Applied against and verified on a real hosted project, not just
+  the local CLI stack — see the two findings below that only showed up there.
 - **Storage** — private `documents` bucket. Object policies compare the first
   segment of `${user_id}/${uuid}-${name}` against `auth.uid()`, so the path
   prefix is the boundary. Reads go through five-minute signed URLs.
@@ -256,6 +258,19 @@ is untouched and still the default.
   "insurance, home" would be read as filter syntax.
 - The activity feed is a nicety. A failed activity insert warns and moves on;
   it must never take down the upload or edit that produced it.
+- A hosted Supabase project grants `anon` full CRUD on every `public` table by
+  default (project-provisioning default privileges), not just `authenticated`
+  — broader than a from-scratch Postgres install, and the local CLI stack
+  doesn't reproduce it. Harmless today because every policy here is scoped
+  `to authenticated`, so `anon` matches none of them, but
+  `20260826000005_revoke_anon.sql` revokes the grant explicitly anyway: the
+  boundary should be structural, not dependent on nobody ever adding a policy
+  without `to authenticated`. Check for it after any fresh project setup.
+- Every `auth.uid()` call in a policy's `using`/`with check` is wrapped as
+  `(select auth.uid())`. Unwrapped, Postgres re-evaluates it per row instead
+  of once per query — the Supabase performance linter (`get_advisors`) flags
+  this on literally every policy if you write it the naive way. Do the same
+  for any policy you add.
 
 ### Not done in Phase 6
 

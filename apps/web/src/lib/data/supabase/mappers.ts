@@ -27,13 +27,32 @@ import type {
  * testing on their own. Everything here is pure: no client, no network.
  */
 
+/**
+ * Postgres renders a timestamptz as `2026-09-10T00:00:00+00:00`; the mock
+ * client stores `new Date(...).toISOString()`, which is `...T00:00:00.000Z`.
+ * Both are the same instant, but the UI compares these strings — the document
+ * form decides whether it is dirty that way — so a document loaded from
+ * Supabase would look permanently edited. Normalizing here keeps the two data
+ * modes byte-identical from the app's point of view.
+ */
+export function toIso(value: string | null): string | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
+}
+
+/** Same, for a column the schema declares `not null`. */
+function toIsoRequired(value: string): string {
+  return toIso(value) ?? value;
+}
+
 export function toUser(row: ProfileRow): User {
   return {
     id: row.user_id,
     email: row.email,
     displayName: row.display_name,
     avatarUrl: row.avatar_url,
-    createdAt: row.created_at,
+    createdAt: toIsoRequired(row.created_at),
   };
 }
 
@@ -67,7 +86,7 @@ export function toCollection(row: CollectionRow): Collection {
     description: row.description,
     icon: row.icon,
     color: row.color,
-    createdAt: row.created_at,
+    createdAt: toIsoRequired(row.created_at),
   };
 }
 
@@ -82,16 +101,16 @@ export function toDocument(row: DocumentRowWithJoins): DocumentRecord {
     storagePath: row.storage_path,
     mimeType: row.mime_type,
     sizeBytes: Number(row.size_bytes),
-    documentDate: row.document_date,
-    expiryDate: row.expiry_date,
-    reminderDate: row.reminder_date,
+    documentDate: toIso(row.document_date),
+    expiryDate: toIso(row.expiry_date),
+    reminderDate: toIso(row.reminder_date),
     isFavorite: row.is_favorite,
     isArchived: row.is_archived,
     tagIds: (row.document_tags ?? []).map((t) => t.tag_id),
     collectionIds: (row.collection_documents ?? []).map((c) => c.collection_id),
     metadata: row.metadata ?? {},
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: toIsoRequired(row.created_at),
+    updatedAt: toIsoRequired(row.updated_at),
   };
 }
 
@@ -100,7 +119,7 @@ export function toReminder(row: ReminderRow): Reminder {
     id: row.id,
     userId: row.user_id,
     documentId: row.document_id,
-    remindAt: row.remind_at,
+    remindAt: toIsoRequired(row.remind_at),
     message: row.message,
     status: row.status,
   };
@@ -113,7 +132,7 @@ export function toActivity(row: ActivityRow): ActivityEvent {
     documentId: row.document_id,
     kind: row.kind as ActivityKind,
     payload: row.payload ?? {},
-    createdAt: row.created_at,
+    createdAt: toIsoRequired(row.created_at),
   };
 }
 

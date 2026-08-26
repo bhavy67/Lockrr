@@ -178,6 +178,46 @@ create trigger documents_touch_updated_at
   for each row execute function public.touch_updated_at();
 
 -- --------------------------------------------------------------------------
+-- Grants
+--
+-- Row level security decides which rows you may touch. It does not grant the
+-- privilege to touch the table at all — that is a separate thing, and without
+-- it every query comes back "permission denied for table ...".
+--
+-- Migrations run as `postgres`, whose own default privileges on a fresh
+-- database hand out nothing but TRUNCATE, REFERENCES and TRIGGER — so
+-- `authenticated` needs these grants written out explicitly or every request
+-- fails before RLS is ever consulted.
+--
+-- A hosted Supabase project's default privileges are broader than that: they
+-- extend the same full CRUD to `anon` too, on every table regardless of who
+-- creates it — verified against a real project, not just the local CLI
+-- stack, which does not reproduce this. That grant is harmless on its own
+-- (every policy below is scoped `to authenticated`, so anon matches none of
+-- them), but leaving it in place means anon's exclusion depends on nobody
+-- ever adding a policy without an explicit `to authenticated`.
+-- `20260826000005_revoke_anon.sql` removes it, so the boundary is structural
+-- rather than incidental.
+-- --------------------------------------------------------------------------
+grant usage on schema public to authenticated, service_role;
+
+grant select, insert, update, delete on
+  public.profiles,
+  public.categories,
+  public.tags,
+  public.collections,
+  public.documents,
+  public.document_tags,
+  public.collection_documents,
+  public.reminders
+to authenticated, service_role;
+
+-- Activity is an append-only record of what happened. You can write an entry
+-- and you can clear your history, but you cannot rewrite one after the fact,
+-- so there is no update grant and no update policy to go with it.
+grant select, insert, delete on public.activity to authenticated, service_role;
+
+-- --------------------------------------------------------------------------
 -- Row level security
 --
 -- One shape for every table: you can see and change your rows, and no others.
