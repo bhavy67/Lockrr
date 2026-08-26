@@ -1,0 +1,17 @@
+{
+  "name": "lockerr",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lockerr — a private personal document vault",
+  "packageManager": "pnpm@11.24.0",
+  "scripts": {
+    "dev": "pnpm --filter @lockerr/web dev",
+    "build": "pnpm --filter @lockerr/web build",
+    "start": "pnpm --filter @lockerr/web start",
+    "lint": "pnpm --filter @lockerr/web lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
