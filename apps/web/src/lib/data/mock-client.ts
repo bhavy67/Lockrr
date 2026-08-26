@@ -13,7 +13,7 @@ import type {
   User,
 } from "@lockerr/types";
 
-import { sleep } from "@/lib/utils";
+import { sanitizeFileName, sleep, stripExtension } from "@/lib/utils";
 import type { AuthResult, DataClient, UploadInput } from "./client";
 import { deleteFile, getFile, putFile } from "./mock-storage";
 
@@ -525,6 +525,15 @@ class MockDataClient implements DataClient {
     return URL.createObjectURL(blob);
   }
 
+  /**
+   * A blob URL is same-origin, so the `download` attribute already names the
+   * file. Nothing extra to do here — the distinction only matters for a real
+   * backend serving from another origin.
+   */
+  async getDocumentDownloadUrl(id: string): Promise<string> {
+    return this.getDocumentUrl(id);
+  }
+
   async listActivity(limit = 50): Promise<ActivityEvent[]> {
     const user = await currentUserOrThrow();
     return read<ActivityEvent[]>(KEYS.activity(user.id), []).slice(0, limit);
@@ -533,15 +542,6 @@ class MockDataClient implements DataClient {
   async listReminders(): Promise<Reminder[]> {
     return [];
   }
-}
-
-function sanitizeFileName(name: string): string {
-  return name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
-}
-
-function stripExtension(name: string): string {
-  const dot = name.lastIndexOf(".");
-  return dot > 0 ? name.slice(0, dot) : name;
 }
 
 export const mockClient: DataClient = new MockDataClient();

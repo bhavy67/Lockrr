@@ -9,10 +9,10 @@ Lockerr is a frontend-first portfolio project that stores, organizes, previews, 
 
 ## Status
 
-The current build ships **Phases 0–5**:
+The current build ships **Phases 0–6**:
 
 - ✅ Monorepo foundation, design system, tokens, dark mode
-- ✅ Auth (mock, local-only): sign up / sign in / sign out with session persistence
+- ✅ Auth: sign up / sign in / sign out with session persistence — browser-local by default, Supabase Auth in `supabase` mode
 - ✅ Fully responsive shell — desktop sidebar, mobile bottom nav, tablet collapsible sheet
 - ✅ Vault MVP — drag-and-drop upload (multi-file, per-file progress), grid & list views, image + PDF preview with zoom/pan, rename / favorite / archive / delete / download, categorization on upload and edit
 - ✅ Dashboard — storage used, uploaded-this-month, needs-attention, favorites; recently added; category breakdown; recent activity linking into timeline
@@ -21,9 +21,10 @@ The current build ships **Phases 0–5**:
 - ✅ Global **command palette** (⌘K / Ctrl+K): search documents, jump to any collection, upload, view favorites/expiring, navigate sections, lock vault
 - ✅ Keyboard shortcuts: `⌘K` palette · `U` upload · `/` focus vault search · `G` then `D/V/C/L/R/T` to navigate
 - ✅ **Phase 4** — visual **timeline** grouped by month (uploads, updates, favorites, document dates, expiries, reminders) with sticky headers; **reminders** with Soon / Later / Expired / All tabs, days-remaining prominence, and a summary strip; live count badge on the Expiring nav item
-- ✅ **Phase 5 — Polish** — motion pass (Framer Motion stagger on the document grid, animated expand for upload metadata, favorite-star spring pop), a11y pass (skip-link, `aria-live` upload status, sidebar landmarks, always-visible actions on touch), **Vitest** suite (26 tests) covering utils/expiry/timeline helpers, **Playwright** smoke tests for signup + keyboard shortcut flow
+- ✅ **Phase 5 — Polish** — motion pass (Framer Motion stagger on the document grid, animated expand for upload metadata, favorite-star spring pop), a11y pass (skip-link, `aria-live` upload status, sidebar landmarks, always-visible actions on touch), **Vitest** suite (59 tests) covering utils/expiry/timeline/mapper helpers, **Playwright** smoke tests for signup + keyboard shortcut flow
+- ✅ **Phase 6 — Real backend** — Supabase Postgres, Auth and Storage behind `NEXT_PUBLIC_DATA_MODE=supabase`; migrations with row level security on every table, a private bucket reachable only through short-lived signed URLs, real per-file upload progress. The browser-local mock stays the default and the first-run experience.
 
-**Roadmap (not yet built):** custom categories, real Supabase integration, OCR / semantic search / AI features. See [Roadmap](#roadmap).
+**Roadmap (not yet built):** custom categories, OCR / semantic search / AI features. See [Roadmap](#roadmap).
 
 ---
 
@@ -37,14 +38,14 @@ The current build ships **Phases 0–5**:
 | Forms / validation | React Hook Form · Zod                                            |
 | Client state | Zustand                                                                |
 | Server state | TanStack Query                                                         |
-| Data layer   | Pluggable interface — mock (local) today, Supabase later               |
-| Storage      | IndexedDB for file blobs, localStorage for records (mock mode)         |
+| Data layer   | Pluggable interface — browser-local mock or Supabase, one env var apart |
+| Storage      | IndexedDB + localStorage (mock) · Postgres + private bucket (Supabase) |
 | Package mgr  | pnpm workspaces                                                        |
-| Testing (planned) | Vitest · Playwright                                               |
+| Testing      | Vitest · Playwright                                                    |
 
 ### Why the data layer is pluggable
 
-Everything reads/writes through `apps/web/src/lib/data/client.ts` (a `DataClient` interface). Today it is backed by a mock (localStorage + IndexedDB). Swapping to Supabase in a later phase means adding one implementation of the same interface — no feature code changes.
+Everything reads and writes through `apps/web/src/lib/data/client.ts` (a `DataClient` interface). Two implementations satisfy it: a mock backed by localStorage + IndexedDB, and a Supabase one. `NEXT_PUBLIC_DATA_MODE` picks between them in `lib/data/index.ts`, and no feature code knows which it got — Phase 6 added a second implementation and changed nothing above the data layer.
 
 ### Why no separate Fastify server (yet)
 
@@ -80,7 +81,7 @@ lockerr/
 │   ├── types/                        Shared domain types
 │   ├── validation/                   Shared Zod schemas
 │   └── config/                       tsconfig.base.json etc.
-└── supabase/                         (Reserved for Phase 6+ migrations & seed)
+└── supabase/                         Migrations, RLS policies, storage bucket
 ```
 
 ---
@@ -113,7 +114,20 @@ pnpm install
 pnpm dev
 ```
 
-Open <http://localhost:3000>. Create an account on the sign-up page — accounts and files are stored **locally on your device** in this build (localStorage for records, IndexedDB for file blobs).
+Open <http://localhost:3000>. Create an account on the sign-up page — by default, accounts and files are stored **locally on your device** (localStorage for records, IndexedDB for file blobs). Nothing leaves the browser and no backend is required.
+
+### Running against Supabase
+
+Optional. The app is fully usable without it.
+
+1. Create a Supabase project, or run one locally with `supabase start`.
+2. Apply the migrations: `supabase db push` (or `supabase db reset` locally).
+3. Put the project URL and anon key in `apps/web/.env.local`, with
+   `NEXT_PUBLIC_DATA_MODE=supabase`.
+4. `pnpm dev`.
+
+See [`supabase/README.md`](supabase/README.md) for the details, including the
+security model.
 
 ### Scripts
 
@@ -141,10 +155,18 @@ E2E tests boot their own Next server on port 3100, sign a new user up (mock auth
 
 ### Environment variables
 
-Copy `.env.example` (in `apps/web/`) if you want to explicitly set the data mode. The defaults are fine — no env is required for local development.
+Copy `.env.example` (in `apps/web/`) to `.env.local`. The defaults are fine — no env is required for local development in mock mode.
 
 ```bash
-NEXT_PUBLIC_DATA_MODE=mock     # or "supabase" once real integration lands
+NEXT_PUBLIC_DATA_MODE=mock            # or "supabase"
+
+# Required only in supabase mode. Both are safe in the browser bundle: row
+# level security means the anon key can only reach the signed-in user's rows.
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+# Bypasses row level security. Server-side only, never committed.
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 ---
@@ -192,18 +214,35 @@ Menus, filters, and confirmations use appropriate primitives per surface (Dialog
 
 ## Security & privacy notes
 
-This build stores everything locally on the user's device. No data leaves the browser. The mock auth is **not** cryptographically secure and should not be used to protect real credentials — it exists so the UI can be developed end-to-end without a backend.
+The posture depends on which data mode you run.
 
-When the Supabase implementation lands (Phase 6+), security controls will include:
+**Mock mode (the default).** Everything stays on the device and no data leaves
+the browser. The password hash is a plain SHA-256 — it is **not**
+cryptographically secure and must not be used to protect real credentials. It
+exists so the UI can be developed end to end without a backend.
 
-- Supabase Auth for identity, sessions verified server-side
-- Row-Level Security policies on every table (`user_id = auth.uid()`)
-- Private storage bucket; downloads via short-lived signed URLs
-- File type + size validation on both client and server
-- Safe file name sanitization + server-generated storage paths (never client-supplied)
-- Secure response headers (already configured in `next.config.mjs`)
+**Supabase mode.** There is no application server in front of Postgres: the
+browser talks to it directly with the anon key, so row level security *is* the
+boundary, not a second line of defence behind one.
 
-Explicit non-goals for the current build: custom cryptography, "zero-knowledge" claims, or anything that would require security guarantees this project can't prove.
+- Supabase Auth for identity. Tokens are refreshed in middleware and verified
+  by Postgres on every request.
+- RLS enabled on all nine tables, each with the same policy shape:
+  `user_id = auth.uid()` for select, insert, update and delete.
+- Private storage bucket. Object policies compare the first segment of
+  `${user_id}/${uuid}-${filename}` against `auth.uid()`, so the path prefix is
+  the boundary rather than a convention.
+- Files are read through signed URLs that expire in five minutes. No object is
+  publicly addressable.
+- Storage paths are generated, never client-supplied, and file names are
+  sanitized so they cannot introduce a path separator.
+- File type and size limits are enforced by the client and again by the bucket
+  (25 MB; PDF and common image types only).
+- Secure response headers, configured in `next.config.mjs`.
+
+Explicit non-goals in either mode: custom cryptography, "zero-knowledge"
+claims, or anything that would require security guarantees this project can't
+prove.
 
 ---
 
@@ -211,8 +250,8 @@ Explicit non-goals for the current build: custom cryptography, "zero-knowledge" 
 
 - [x] **Phase 3 — Organize & find**: tags, collections, filters, sorting, command palette (⌘K), keyboard shortcuts
 - [x] **Phase 4 — Track**: timeline, expired/soon/later reminders, expiry badge in nav, dashboard insights
-- [x] **Phase 5 — Polish**: motion pass, a11y improvements, Vitest suite (26 tests), Playwright smoke tests, screenshots scaffold
-- [ ] **Phase 6 — Real backend**: Supabase Postgres + Storage + Auth, RLS policies, migrations
+- [x] **Phase 5 — Polish**: motion pass, a11y improvements, Vitest suite, Playwright smoke tests, screenshots scaffold
+- [x] **Phase 6 — Real backend**: Supabase Postgres + Storage + Auth, RLS policies, migrations
 - [ ] **Phase 7 — Optional intelligence**: OCR (Tesseract), classification, semantic search (pgvector), Ask Lockerr — all behind a provider abstraction, all opt-in
 
 Each phase is designed to leave the app in a shippable, working state.

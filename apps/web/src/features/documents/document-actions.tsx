@@ -69,14 +69,18 @@ export function DocumentActionsMenu({ document: doc, align = "end" }: Props) {
 
   const download = async () => {
     try {
-      const url = await data.getDocumentUrl(doc.id);
+      // Not getDocumentUrl: that one renders inline. This one arrives as an
+      // attachment named after the original file, whichever data mode is on.
+      const url = await data.getDocumentDownloadUrl(doc.id);
       const a = window.document.createElement("a");
       a.href = url;
       a.download = doc.fileName;
       window.document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      if (url.startsWith("blob:")) {
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
     } catch {
       toast.error("Couldn't download this document.");
     }

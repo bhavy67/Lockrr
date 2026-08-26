@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { cn, formatBytes, initials, truncate } from "./utils";
+import {
+  cn,
+  formatBytes,
+  initials,
+  sanitizeFileName,
+  stripExtension,
+  truncate,
+} from "./utils";
 
 describe("cn", () => {
   it("merges class names and dedupes tailwind conflicts", () => {
@@ -61,5 +68,43 @@ describe("truncate", () => {
 
   it("truncates with ellipsis", () => {
     expect(truncate("abcdefghij", 5)).toBe("abcd…");
+  });
+});
+
+describe("stripExtension", () => {
+  it("drops a trailing extension", () => {
+    expect(stripExtension("passport.pdf")).toBe("passport");
+  });
+
+  it("drops only the last one", () => {
+    expect(stripExtension("scan.2024.final.pdf")).toBe("scan.2024.final");
+  });
+
+  it("leaves a name without an extension alone", () => {
+    expect(stripExtension("passport")).toBe("passport");
+  });
+
+  it("treats a leading dot as part of the name", () => {
+    expect(stripExtension(".gitignore")).toBe(".gitignore");
+  });
+});
+
+describe("sanitizeFileName", () => {
+  it("keeps a plain name intact", () => {
+    expect(sanitizeFileName("passport.pdf")).toBe("passport.pdf");
+  });
+
+  it("collapses characters that do not belong in a storage path", () => {
+    expect(sanitizeFileName("my passport (2024).pdf")).toBe(
+      "my_passport_2024_.pdf",
+    );
+  });
+
+  it("cannot be used to climb out of the user's folder", () => {
+    expect(sanitizeFileName("../../etc/passwd")).not.toContain("/");
+  });
+
+  it("caps the length", () => {
+    expect(sanitizeFileName("a".repeat(300))).toHaveLength(120);
   });
 });

@@ -65,11 +65,21 @@ export interface DataClient {
     patch: Partial<DocumentRecord>,
   ): Promise<DocumentRecord>;
   deleteDocument(id: string): Promise<void>;
+  /** A URL for viewing the file inline — image and PDF previews use this. */
   getDocumentUrl(id: string): Promise<string>;
+  /**
+   * A URL that saves the file under its original name.
+   *
+   * Separate from `getDocumentUrl` because the two need different responses:
+   * a preview must render inline, a download must arrive as an attachment.
+   * With a real backend the file is served from another origin, where the
+   * `download` attribute on a link is ignored and only the server can name it.
+   */
+  getDocumentDownloadUrl(id: string): Promise<string>;
 
   // ---- Activity ----
   listActivity(limit?: number): Promise<ActivityEvent[]>;
 
-  // ---- Reminders (stub for now, real in Phase 4) ----
+  // ---- Reminders ----
   listReminders(): Promise<Reminder[]>;
 }

@@ -28,9 +28,9 @@ The core loop: **upload → understand → organize → search → preview → t
 | 2     | ✅     | Vault MVP: upload dialog v2, grid/list, image + PDF preview, favorite/archive/delete/download, categorize    |
 | 3     | ✅     | Tags, collections, categories browse, filter popover + bottom sheet, sort, ⌘K palette, keyboard shortcuts    |
 | 4     | ✅     | Visual timeline, reminders tabs (Soon/Later/Expired/All), expiring nav badge, dashboard insights             |
-| 5     | ✅     | Motion pass (Framer Motion stagger + spring pop), a11y pass, Vitest suite (26 tests), Playwright smoke      |
-| **6** | **⏳** | **Real Supabase backend** — see "Phase 6 — what to build next" below                                          |
-| 7     | ⏳     | Optional intelligence (OCR, semantic search, Ask Lockerr) behind a provider abstraction                       |
+| 5     | ✅     | Motion pass (Framer Motion stagger + spring pop), a11y pass, Vitest suite, Playwright smoke                   |
+| 6     | ✅     | Real Supabase backend behind `NEXT_PUBLIC_DATA_MODE=supabase` — schema, RLS, storage, auth, middleware       |
+| **7** | **⏳** | **Optional intelligence** (OCR, semantic search, Ask Lockerr) behind a provider abstraction                   |
 
 ---
 
@@ -47,7 +47,8 @@ pnpm e2e              # playwright (uses port 3100)
 pnpm typecheck        # tsc across all workspaces
 ```
 
-No env vars required for local dev. The mock data layer runs by default.
+No env vars required for local dev. The mock data layer runs by default. To run
+against a real backend instead, see `supabase/README.md`.
 
 ---
 
@@ -67,7 +68,8 @@ lockerr/
 │       │   ├── ui/                shadcn-style primitives — reuse, do not duplicate
 │       │   └── brand/             Logo, wordmark
 │       └── lib/
-│           ├── data/              DataClient interface + mock impl (see contract below)
+│           ├── data/              DataClient interface + mock and Supabase impls
+│           │                     (see contract below)
 │           ├── hooks/             use-debounced, use-reduced-motion
 │           ├── query-keys.ts
 │           └── utils.ts
@@ -75,12 +77,12 @@ lockerr/
 │   ├── types/                     @lockerr/types — shared domain types
 │   ├── validation/                @lockerr/validation — shared Zod schemas
 │   └── config/                    @lockerr/config — tsconfig.base.json
-└── supabase/                      Reserved for Phase 6 migrations + seed
+└── supabase/                      Migrations, RLS policies, storage bucket
 ```
 
 ### Why no separate Fastify server (yet)
 
-The spec allows one. Supabase + Next.js Route Handlers cover the MVP surface without duplication. Fastify only becomes worth its weight when Phase 7 lands (OCR, embeddings, background jobs). Do **not** scaffold `apps/api` before it's needed.
+The spec allows one. Supabase covers the whole MVP surface on its own — Phase 6 shipped without a single Route Handler, because RLS makes the browser's anon key safe to use directly. Fastify only becomes worth its weight when Phase 7 lands (OCR, embeddings, background jobs). Do **not** scaffold `apps/api` before it's needed.
 
 ---
 
@@ -90,10 +92,10 @@ All data access goes through **`@/lib/data`** — that resolves to `apps/web/src
 
 - **Features import `data` from `@/lib/data`. Full stop.**
 - Features never import Supabase or the mock client directly.
-- If a feature needs a new operation, add it to the `DataClient` interface first, implement it in the mock client, then use it.
-- `NEXT_PUBLIC_DATA_MODE=mock` (default) uses `mock-client.ts`. `=supabase` will use the Supabase implementation (Phase 6).
+- If a feature needs a new operation, add it to the `DataClient` interface first, then implement it in **both** clients, then use it. Neither implementation is optional: the mock is what E2E runs against and what someone sees on first run.
+- `NEXT_PUBLIC_DATA_MODE=mock` (default) uses `mock-client.ts`. `=supabase` uses `supabase-client.ts`.
 
-This is the single most important architectural rule. Break it and Phase 6 becomes a rewrite instead of a swap.
+This is the single most important architectural rule. It is what made Phase 6 a second implementation rather than a rewrite — no feature file changed.
 
 ### Mock client behavior (for testing)
 
@@ -145,8 +147,8 @@ Ignored while typing in inputs (except `⌘K`). Wired in `features/command-palet
 
 ## Testing
 
-- **Vitest** (`apps/web/vitest.config.ts`, happy-dom env). Unit tests only. Live next to source: `foo.ts` + `foo.test.ts`. Currently covers `utils`, `expiry`, `timeline-data`. Add tests for any new pure helper.
-- **Playwright** (`apps/web/playwright.config.ts`). E2E lives in `apps/web/e2e/`. Boots its own dev server on port 3100 so it won't clash with `pnpm dev` on 3000. Each test gets an isolated browser context; mock data is scoped to that context.
+- **Vitest** (`apps/web/vitest.config.ts`, happy-dom env). Unit tests only. Live next to source: `foo.ts` + `foo.test.ts`. Covers `utils`, `expiry`, `timeline-data`, and the Supabase row mappers. Add tests for any new pure helper.
+- **Playwright** (`apps/web/playwright.config.ts`). E2E lives in `apps/web/e2e/`. Boots its own dev server on port 3100 so it won't clash with `pnpm dev` on 3000. Each test gets an isolated browser context; mock data is scoped to that context. E2E always runs in mock mode — keep it that way, it needs no backend and no cleanup.
 
 Do **not** write tests for React components unless there's real logic to cover. UI look-and-feel is verified by hand + Playwright smoke.
 
@@ -195,65 +197,87 @@ Toasts are styled via `classNames` in `providers.tsx` — do not add another Toa
 
 We deliberately use the browser's native PDF viewer via `<object>` (not `react-pdf`) to keep the bundle small. If Phase 7 needs OCR / annotation / page thumbnails, switch to PDF.js at that point.
 
-### 7. `stripExtension` lives twice
+### 7. Supabase upload progress needs XHR
 
-In `mock-client.ts` (server-ish) and `upload-dialog.tsx` (UI). If Phase 6 needs it on the real backend, extract to `packages/validation` or `lib/utils`.
+`storage.upload()` goes through fetch, which reports nothing until the request
+finishes — a large scan would sit at 0% and then jump to done, regressing the
+upload dialog. `lib/data/supabase/upload.ts` asks storage for a signed upload
+URL and PUTs to it over `XMLHttpRequest` instead, which does emit progress.
+If `storage-js` ever grows a real `onUploadProgress`, that file is the only
+thing to delete.
+
+### 8. Hand-written database types must be type *aliases*
+
+`lib/data/supabase/database.types.ts` is written by hand to match the
+migrations. The row shapes are `type X = {...}`, not `interface X {...}`, on
+purpose: PostgREST's generics require `Record<string, unknown>`, and only type
+aliases get the implicit index signature that satisfies it. Turn one into an
+interface and every query silently degrades to `never` with a wall of
+confusing errors.
 
 ---
 
-## Phase 6 — what to build next
+## Phase 6 — what shipped
 
-**Real Supabase**, gated behind `NEXT_PUBLIC_DATA_MODE=supabase`. Keep the mock client working — don't delete it.
+Real Supabase, gated behind `NEXT_PUBLIC_DATA_MODE=supabase`. The mock client
+is untouched and still the default.
 
-### Plan
+- **Migrations** in `supabase/migrations/` — nine tables, each with `user_id`
+  and four RLS policies (`user_id = auth.uid()`). A trigger on `auth.users`
+  seeds the profile and the eleven default categories in the same transaction
+  as the account. `search_tsv` + GIN index exist but nothing reads them yet.
+- **Storage** — private `documents` bucket. Object policies compare the first
+  segment of `${user_id}/${uuid}-${name}` against `auth.uid()`, so the path
+  prefix is the boundary. Reads go through five-minute signed URLs.
+- **`supabase-client.ts`** — the second `DataClient`. Row mapping and the
+  fiddly query building live in `supabase/mappers.ts`, which is pure and unit
+  tested.
+- **`middleware.ts`** — refreshes tokens and guards app routes. **No-op in
+  mock mode**: the mock session lives in localStorage, which middleware cannot
+  see, so redirecting there would lock people out of their own vault.
+- **`getDocumentDownloadUrl`** — added to `DataClient`. `getDocumentUrl`
+  renders inline; this one arrives as an attachment. They have to be separate
+  because a signed URL is cross-origin, where `<a download>` cannot name the
+  file and only the server can.
 
-1. **Supabase project setup**
-   - Provision project (dashboard). Get URL + anon key + service role key.
-   - Add to `.env.local` (don't commit). Extend `.env.example` with the new vars.
+### Things worth knowing before changing it
 
-2. **Database migrations** in `supabase/migrations/`
-   - `profiles`, `categories`, `documents`, `tags`, `document_tags`, `collections`, `collection_documents`, `reminders`, `activity`.
-   - Every table has `user_id uuid references auth.users(id) on delete cascade`.
-   - RLS **on** for every table. Policy: `user_id = auth.uid()` for select/insert/update/delete.
-   - Add a trigger to seed default categories on `auth.users` insert (or do it client-side on first login — pick one).
-   - Add `search_tsv tsvector` column on documents + GIN index (unused today, ready for FTS in Phase 7).
+- `DEFAULT_CATEGORIES` in `mock-client.ts` and the category list in
+  `20260826000002_new_user.sql` are the same data in two places. Change one,
+  change the other — the two modes are meant to be indistinguishable.
+- `database.types.ts` is hand-written. If you add a migration, update it in the
+  same commit; nothing at runtime will tell you it drifted. Regenerate with
+  `supabase gen types typescript --local`.
+- "Documents with *all* of these tags" is not expressible in one PostgREST
+  filter. `listDocuments` narrows to a set of ids first — see
+  `documentIdsWithAllTags`.
+- Search goes through `documentSearchFilter`, which double-quotes the term.
+  PostgREST's `or=` grammar is comma-separated, so an unquoted search for
+  "insurance, home" would be read as filter syntax.
+- The activity feed is a nicety. A failed activity insert warns and moves on;
+  it must never take down the upload or edit that produced it.
 
-3. **Storage**
-   - Private bucket `documents`. Path convention: `${user_id}/${uuid}-${sanitized_filename}`.
-   - RLS on storage.objects: user can only touch their own path prefix.
-   - Downloads via short-lived signed URLs (client requests, server issues).
+### Not done in Phase 6
 
-4. **Supabase data client** at `apps/web/src/lib/data/supabase-client.ts`
-   - Implements the `DataClient` interface. Same public surface as mock.
-   - `getSession()` uses `supabase.auth.getSession()`.
-   - `uploadDocument` uploads via `supabase.storage.from('documents').upload(...)` with progress via the `onUploadProgress` option, then inserts the row.
-   - `getDocumentUrl` returns a signed URL (expiry ~5 min).
+- No Route Handlers. Signed URLs are issued client-side by the RLS-scoped anon
+  key, which is exactly as safe and one hop shorter. Add handlers when
+  something genuinely needs the service role key.
+- `listReminders` reads the real table, but nothing writes to it yet. Reminders
+  are still derived from document expiry dates in the UI.
+- Both data clients are in the bundle in either mode. The resolver picks at
+  runtime, so this can't be tree-shaken. It costs ~40 KB in mock mode.
 
-5. **Switch resolver** in `apps/web/src/lib/data/index.ts` — actually pick between mock and Supabase based on `NEXT_PUBLIC_DATA_MODE`. Today it always returns the mock even when set to supabase (see the file).
+---
 
-6. **Auth**
-   - Swap the mock signup/signin for `supabase.auth.signUp` / `signInWithPassword`.
-   - Middleware in `apps/web/src/middleware.ts` (new file) to refresh sessions server-side.
-   - Route Handlers use `createServerClient` with cookies for authorized DB calls.
+## Phase 7 — what to build next
 
-7. **Migrations tooling**
-   - Use Supabase CLI (`supabase start` for local Postgres stack via Docker, or hit the cloud project directly).
-   - `supabase db push` from `supabase/` directory.
+Optional intelligence, all behind a provider abstraction, all opt-in:
 
-8. **Update README** — swap "local-only mock" claims for real security posture. Update `.env.example`.
-
-### Things to preserve during the swap
-
-- The upload dialog v2 flow — do not regress it.
-- The `DataClient` interface — extend if needed, but every existing method stays.
-- Query keys — do not change shape or invalidations will silently break.
-- The mock client — keep it as a first-run experience and for E2E tests (Playwright doesn't need a real backend).
-
-### Explicit non-goals for Phase 6
-
-- Do not introduce Fastify. Route Handlers + Supabase are enough.
-- Do not implement custom crypto. Signed URLs + RLS are the security model.
-- Do not scaffold OCR / embeddings — that's Phase 7.
+- OCR on upload (Tesseract), text into `documents.search_tsv` — the column and
+  its GIN index are already there.
+- Semantic search (pgvector) and "Ask Lockerr".
+- This is the point where `apps/api` (Fastify) starts earning its weight —
+  background jobs, embeddings, scheduled reminder delivery. Not before.
 
 ---
 
@@ -272,6 +296,7 @@ Examples:
 ## Related documentation
 
 - Root **README.md** — public-facing project overview, screenshots, roadmap
+- `supabase/README.md` — running the backend locally or hosted, and the security model
 - `apps/web/.env.example` — env var contract
 - `apps/web/e2e/smoke.spec.ts` — reference for how to author new E2E tests
 - Spec conversation lives in git history (`git log`) — first commit references the original brief

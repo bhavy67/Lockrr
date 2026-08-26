@@ -42,7 +42,7 @@ import {
 import { useCategories } from "@/features/documents/hooks";
 import { TagPicker } from "@/features/tags/tag-picker";
 import { data } from "@/lib/data";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, formatBytes, stripExtension } from "@/lib/utils";
 import { useUploadDialog } from "./upload-dialog-store";
 
 interface QueueItem {
@@ -52,11 +52,6 @@ interface QueueItem {
   progress: number;
   status: "queued" | "uploading" | "done" | "error";
   error?: string;
-}
-
-function stripExtension(name: string): string {
-  const dot = name.lastIndexOf(".");
-  return dot > 0 ? name.slice(0, dot) : name;
 }
 
 function toIsoOrNull(dateInput: string): string | null {

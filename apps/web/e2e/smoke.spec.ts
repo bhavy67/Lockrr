@@ -26,7 +26,9 @@ test.describe("Lockerr smoke", () => {
     await page.getByLabel("Password").fill("password123");
     await page.getByRole("button", { name: /create your vault/i }).click();
 
-    await expect(page).toHaveURL(/\/dashboard/);
+    // waitForURL, not toHaveURL: the dev server compiles /dashboard on this
+    // first navigation, which can outlast the 5s expect timeout.
+    await page.waitForURL(/\/dashboard/);
     await expect(
       page.getByRole("heading", { name: /test user/i }),
     ).toBeVisible();

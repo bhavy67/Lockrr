@@ -33,3 +33,21 @@ export function truncate(s: string, max: number): string {
 export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
+
+/**
+ * A file's name without its extension — the default title for an upload.
+ * A leading dot is left alone: ".gitignore" is a name, not an extension.
+ */
+export function stripExtension(name: string): string {
+  const dot = name.lastIndexOf(".");
+  return dot > 0 ? name.slice(0, dot) : name;
+}
+
+/**
+ * A file name safe to put in a storage path. Anything that isn't a word
+ * character, dot or dash collapses to an underscore, which also means a name
+ * can never introduce a path separator and climb out of its folder.
+ */
+export function sanitizeFileName(name: string): string {
+  return name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+}
