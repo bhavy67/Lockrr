@@ -22,7 +22,7 @@ export function SignUpForm() {
   const onSubmit = form.handleSubmit(async (values) => {
     try {
       await signUp.mutateAsync(values);
-      toast.success("Welcome to Lockerr.");
+      toast.success("Welcome to LockKaro.");
       router.replace("/dashboard");
     } catch (err) {
       const message =

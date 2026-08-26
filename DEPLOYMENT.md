@@ -1,6 +1,6 @@
-# Deploying Lockerr
+# Deploying LockKaro
 
-This walks through getting Lockerr live at a public URL — Supabase (database
+This walks through getting LockKaro live at a public URL — Supabase (database
 + auth + storage) plus Vercel (Next.js hosting), which is the fastest free
 path. Both services have free tiers generous enough for a portfolio demo.
 

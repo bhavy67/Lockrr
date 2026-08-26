@@ -14,7 +14,7 @@ const capabilities = [
   {
     icon: FileText,
     title: "Every document, one calm place",
-    body: "IDs, invoices, warranties, degrees, insurance — kept together, easy to find later.",
+    body: "IDs, insurance, degrees, receipts, warranties — kept together, easy to find later.",
   },
   {
     icon: Search,
@@ -23,18 +23,18 @@ const capabilities = [
   },
   {
     icon: CalendarClock,
-    title: "Know before it expires",
-    body: "Track document dates, expiries, and reminders so nothing important lapses.",
+    title: "Clock every renewal",
+    body: "Insurance, warranties, driving license, passport — track expiry dates so nothing important lapses.",
   },
   {
     icon: Tags,
     title: "Organize the way you think",
-    body: "Categories, tags, and collections — group a Europe trip or a job application in one view.",
+    body: "Categories, tags, and collections — group a job application or your home documents in one view.",
   },
   {
     icon: ShieldCheck,
     title: "Private by design",
-    body: "Your vault, your device. Data stays with you — no ads, no scraping, no surprises.",
+    body: "Your vault, your device. Nothing is scraped, nothing is sold, nothing leaves the browser.",
   },
   {
     icon: Sparkles,
@@ -42,6 +42,8 @@ const capabilities = [
     body: "Instant preview, keyboard shortcuts, mobile-first flows. Feels good every time you open it.",
   },
 ];
+
+const mockDocs = ["Passport", "Insurance", "Rent Agreement", "Degree"];
 
 export default function LandingPage() {
   return (
@@ -51,14 +53,16 @@ export default function LandingPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              A private home for the paperwork of your life
+              One vault, every document.
             </span>
-            <h1 className="text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-              Where is that important document?
+            <h1 className="text-balance text-5xl font-semibold tracking-tight text-foreground sm:text-6xl md:text-7xl">
+              <span className="block">Lock it.</span>
+              <span className="block text-primary">Clock it.</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Lockerr is a calm, private vault for the documents that actually matter —
-              organized the way you think and ready when you need them.
+            <p className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+              A calm, private vault for the paperwork of your life. IDs,
+              insurance, degrees, receipts — all in one place and ready
+              when you need them.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button size="lg" asChild>
@@ -67,7 +71,7 @@ export default function LandingPage() {
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="ghost" asChild>
+              <Button size="lg" variant="outline" asChild>
                 <Link href="/sign-in">I already have an account</Link>
               </Button>
             </div>
@@ -83,26 +87,24 @@ export default function LandingPage() {
                 <span className="h-2.5 w-2.5 rounded-full bg-muted" />
                 <span className="h-2.5 w-2.5 rounded-full bg-muted" />
                 <span className="ml-3 text-[11px] font-mono text-muted-foreground">
-                  vault.lockerr.app
+                  vault.lockkaro.app
                 </span>
               </div>
               <div className="grid grid-cols-4 gap-3 p-4">
-                {["Passport", "Rent Agreement", "Laptop Invoice", "Insurance"].map(
-                  (t) => (
-                    <div
-                      key={t}
-                      className="flex aspect-[4/5] flex-col justify-between rounded-lg border border-border bg-card p-3"
-                    >
-                      <div className="h-3 w-8 rounded-full bg-primary/60" />
-                      <div className="space-y-1.5">
-                        <div className="text-[11px] font-medium text-foreground">
-                          {t}
-                        </div>
-                        <div className="h-1 w-2/3 rounded-full bg-muted" />
+                {mockDocs.map((t) => (
+                  <div
+                    key={t}
+                    className="flex aspect-[4/5] flex-col justify-between rounded-lg border border-border bg-card p-3"
+                  >
+                    <div className="h-3 w-8 rounded-full bg-primary/60" />
+                    <div className="space-y-1.5">
+                      <div className="text-[11px] font-medium text-foreground">
+                        {t}
                       </div>
+                      <div className="h-1 w-2/3 rounded-full bg-muted" />
                     </div>
-                  ),
-                )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>

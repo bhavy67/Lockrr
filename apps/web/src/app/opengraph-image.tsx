@@ -5,10 +5,14 @@ import { ImageResponse } from "next/og";
  * result as /opengraph-image at 1200×630. No external font is required —
  * ImageResponse falls back to the platform sans-serif, which is fine at OG
  * sizes.
+ *
+ * Design: dark gradient stage with the brand mark top-left, tagline
+ * ("Lock it. Clock it.") as the hero, and a bilingual subhead. The two
+ * lines of the tagline stack vertically to preserve the beat pattern.
  */
 
 export const runtime = "edge";
-export const alt = "Lockerr — your private document vault";
+export const alt = "LockKaro — Lock it. Clock it.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -30,12 +34,12 @@ export default function OpengraphImage() {
         }}
       >
         {/* Brand mark */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
           <div
             style={{
-              width: 72,
-              height: 72,
-              borderRadius: 16,
+              width: 76,
+              height: 76,
+              borderRadius: 17,
               background: "#4F46E5",
               display: "flex",
               alignItems: "center",
@@ -43,52 +47,55 @@ export default function OpengraphImage() {
             }}
           >
             <svg
-              width={40}
-              height={40}
+              width={44}
+              height={44}
               viewBox="0 0 32 32"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M11 15.5v-3a5 5 0 1 1 10 0v3"
+                d="M11 15v-3a5 5 0 1 1 10 0v3"
                 stroke="#ffffff"
-                strokeWidth={2.4}
+                strokeWidth={2.6}
                 strokeLinecap="round"
                 fill="none"
               />
               <rect
                 x={9}
-                y={14.5}
+                y={14}
                 width={14}
-                height={10.5}
-                rx={2.2}
+                height={11}
+                rx={2.4}
                 fill="#ffffff"
               />
-              <circle cx={16} cy={19.5} r={1.5} fill="#4F46E5" />
+              <circle cx={16} cy={19.5} r={1.7} fill="#4F46E5" />
             </svg>
           </div>
           <div
             style={{
-              fontSize: 36,
-              fontWeight: 700,
+              fontSize: 40,
               letterSpacing: -0.5,
+              display: "flex",
             }}
           >
-            Lockerr
+            <span style={{ fontWeight: 500 }}>Lock</span>
+            <span style={{ fontWeight: 800 }}>Karo</span>
           </div>
         </div>
 
-        {/* Headline */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        {/* Tagline as hero */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
           <div
             style={{
-              fontSize: 76,
-              fontWeight: 700,
-              lineHeight: 1.05,
-              letterSpacing: -1.5,
-              maxWidth: 900,
+              display: "flex",
+              flexDirection: "column",
+              fontSize: 132,
+              fontWeight: 800,
+              lineHeight: 0.98,
+              letterSpacing: -3,
             }}
           >
-            Where is that important document?
+            <span>Lock it.</span>
+            <span style={{ color: "#A5B4FC" }}>Clock it.</span>
           </div>
           <div
             style={{
@@ -99,6 +106,7 @@ export default function OpengraphImage() {
             }}
           >
             A calm, private vault for the paperwork of your life.
+            IDs, insurance, degrees, receipts — all in one place.
           </div>
         </div>
 

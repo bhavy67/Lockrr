@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@lockerr/types", "@lockerr/validation"],
+  // Hide the Next.js dev overlay indicator (the floating "N" badge). Prod is
+  // unaffected — it only ever renders during `next dev`.
+  devIndicators: false,
   experimental: {
     optimizePackageImports: ["lucide-react", "date-fns"],
   },

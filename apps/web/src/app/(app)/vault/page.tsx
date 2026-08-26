@@ -16,7 +16,7 @@ export default async function VaultPage({ searchParams }: Props) {
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
         title="Vault"
-        description="Every document you've stored in Lockerr."
+        description="Every document you've stored in your vault."
         action={
           <UploadCta>
             <Plus className="h-4 w-4" />

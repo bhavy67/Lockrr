@@ -75,15 +75,17 @@ const DEFAULT_CATEGORIES: Array<
   Pick<Category, "name" | "slug" | "icon" | "color" | "sortOrder">
 > = [
   { name: "Identity", slug: "identity", icon: "id-card", color: "#6366F1", sortOrder: 1 },
-  { name: "Finance", slug: "finance", icon: "wallet", color: "#059669", sortOrder: 2 },
-  { name: "Insurance", slug: "insurance", icon: "shield", color: "#0EA5E9", sortOrder: 3 },
-  { name: "Healthcare", slug: "healthcare", icon: "heart-pulse", color: "#DC2626", sortOrder: 4 },
-  { name: "Education", slug: "education", icon: "graduation-cap", color: "#7C3AED", sortOrder: 5 },
-  { name: "Work", slug: "work", icon: "briefcase", color: "#0F766E", sortOrder: 6 },
-  { name: "Travel", slug: "travel", icon: "plane", color: "#F59E0B", sortOrder: 7 },
-  { name: "Home", slug: "home", icon: "house", color: "#EA580C", sortOrder: 8 },
-  { name: "Electronics", slug: "electronics", icon: "cpu", color: "#3B82F6", sortOrder: 9 },
-  { name: "Receipts", slug: "receipts", icon: "receipt", color: "#64748B", sortOrder: 10 },
+  { name: "Property", slug: "property", icon: "key-round", color: "#B45309", sortOrder: 2 },
+  { name: "Vehicle", slug: "vehicle", icon: "car", color: "#0D9488", sortOrder: 3 },
+  { name: "Finance", slug: "finance", icon: "wallet", color: "#059669", sortOrder: 4 },
+  { name: "Insurance", slug: "insurance", icon: "shield", color: "#0EA5E9", sortOrder: 5 },
+  { name: "Healthcare", slug: "healthcare", icon: "heart-pulse", color: "#DC2626", sortOrder: 6 },
+  { name: "Education", slug: "education", icon: "graduation-cap", color: "#7C3AED", sortOrder: 7 },
+  { name: "Work", slug: "work", icon: "briefcase", color: "#0F766E", sortOrder: 8 },
+  { name: "Travel", slug: "travel", icon: "plane", color: "#F59E0B", sortOrder: 9 },
+  { name: "Home", slug: "home", icon: "house", color: "#EA580C", sortOrder: 10 },
+  { name: "Electronics", slug: "electronics", icon: "cpu", color: "#3B82F6", sortOrder: 11 },
+  { name: "Receipts", slug: "receipts", icon: "receipt", color: "#64748B", sortOrder: 12 },
   { name: "Other", slug: "other", icon: "file", color: "#71717A", sortOrder: 99 },
 ];
 

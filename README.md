@@ -1,9 +1,9 @@
-# Lockerr
+# LockKaro
 
-**A private, personal document vault.**
-Where is that important document? Right here, calmly organized and ready when you need it.
+**Lock it. Clock it.**
+A calm, private vault for the paperwork of your life — IDs, insurance, degrees, receipts, all in one place and ready when you need them.
 
-Lockerr is a frontend-first portfolio project that stores, organizes, previews, and tracks the paperwork of your life — IDs, invoices, warranties, degrees, insurance, receipts. It is designed to feel like a real consumer product rather than a CRUD demo.
+LockKaro is a frontend-first portfolio project that stores, organizes, previews, and tracks the paperwork you actually need. Two verbs earn their spot in the product: **Lock** for a private local-or-Supabase vault, **Clock** for expiry tracking, reminders, and a full timeline of everything that happens in it. Designed to feel like a real consumer product rather than a CRUD demo.
 
 ---
 
@@ -25,7 +25,7 @@ The current build ships **Phases 0–6**:
 - ✅ **Phase 6 — Real backend** — Supabase Postgres, Auth and Storage behind `NEXT_PUBLIC_DATA_MODE=supabase`; migrations with row level security on every table, a private bucket reachable only through short-lived signed URLs, real per-file upload progress. The browser-local mock stays the default and the first-run experience.
 - ✅ **Phase 7.1 — Text extraction** — Every document uploaded gets its text extracted **client-side**: PDF.js reads embedded text layers, Tesseract.js OCRs images, all off the main thread. Nothing is sent to a server. A new **Content** tab on document detail shows the extracted text with copy + re-extract actions. Storage lives in a new `document_texts` table with a GIN-indexed `tsvector` column, ready for Postgres full-text search whenever we want it.
 
-**Roadmap (not yet built):** custom categories, bulk actions, richer sample data seeding, live deployment + screenshots. Cloud AI features (Ask Lockerr, semantic embeddings, auto-classification) are explicitly out of scope — the project stays private-by-default with no third-party APIs.
+**Roadmap (not yet built):** custom categories, bulk actions, richer sample data seeding, live deployment + screenshots. Cloud AI features (Ask LockKaro, semantic embeddings, auto-classification) are explicitly out of scope — the project stays private-by-default with no third-party APIs.
 
 ---
 
@@ -57,7 +57,7 @@ The spec allows for a Fastify API. For the MVP surface (auth + CRUD on documents
 ## Project structure
 
 ```
-lockerr/
+lockkaro/
 ├── apps/
 │   └── web/                          Next.js 15 app (primary product)
 │       └── src/

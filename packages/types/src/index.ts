@@ -11,6 +11,8 @@ export interface User {
 
 export type CategorySlug =
   | "identity"
+  | "property"
+  | "vehicle"
   | "education"
   | "work"
   | "finance"

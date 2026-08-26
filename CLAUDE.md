@@ -1,13 +1,18 @@
-# CLAUDE.md — Lockerr
+# CLAUDE.md — LockKaro
 
 > This file is loaded automatically at the start of every Claude Code session in this repo.
 > Read it once, then continue. It captures the decisions and traps that aren't obvious from the code alone.
 
 ---
 
-## What Lockerr is
+## What LockKaro is
 
-A private, personal document vault. Users upload, organize, preview, search, and track important paperwork (IDs, invoices, warranties, insurance, certificates). Portfolio-quality frontend project — **not a CRUD demo, not an admin dashboard**.
+A private, personal document vault. Users upload, organize, preview, search, and track important paperwork (IDs, insurance, degrees, warranties, receipts, property papers). Portfolio-quality frontend project — **not a CRUD demo, not an admin dashboard**.
+
+**Product name**: LockKaro. The name is Hinglish (Lock + Karo, "lock it"), but that's the only Hindi anywhere in the product — see Voice below. Wordmark uses weight contrast: "Lock" medium, "Karo" bold.
+**Tagline**: *"Lock it. Clock it."* — the two verbs name the product's two headline features: private storage (lock) and expiry tracking / timeline (clock).
+**Voice**: **All copy is English.** Landing, in-product, metadata, docs — every string is English. The brand name itself is the only Hinglish element in the product. Explicit user call in Aug 2026 after a first pass drifted into Hindi phrases ("Sab kuch, ek jagah", "Aap ke documents") — do not reintroduce even briefly. India-specific proper nouns (Aadhaar, PAN, LIC, PUC) were also stripped from copy at the same time; use globally recognizable examples (passport, driving license, insurance, degree, rent agreement).
+**Legacy note**: The project was originally called "Lockerr". Internal package IDs (`@lockerr/*`) and a couple of internal type names (`LockerrSupabaseClient`) were **not** renamed — invisible to users, mechanical churn without payoff. Do not rename them without a real reason.
 
 The core loop: **upload → understand → organize → search → preview → track → retrieve.**
 

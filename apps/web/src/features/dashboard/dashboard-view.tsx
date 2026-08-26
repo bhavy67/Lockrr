@@ -259,7 +259,7 @@ export function DashboardView() {
             </div>
             {!activity || activity.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-surface/50 p-5 text-center text-xs text-muted-foreground">
-                Actions will appear here as you use Lockerr.
+                Actions will appear here as you upload and organize.
               </div>
             ) : (
               <ul className="space-y-2 text-xs">

@@ -22,28 +22,34 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Lockerr — your private document vault",
-    template: "%s · Lockerr",
+    default: "LockKaro — Lock it. Clock it.",
+    template: "%s · LockKaro",
   },
   description:
-    "A calm, private vault for the documents that matter. Store, organize, and find your important papers in one place.",
-  applicationName: "Lockerr",
-  authors: [{ name: "Lockerr" }],
-  keywords: ["document vault", "personal documents", "privacy", "portfolio"],
+    "A calm, private vault for the paperwork of your life. IDs, insurance, degrees, receipts — all in one place.",
+  applicationName: "LockKaro",
+  authors: [{ name: "LockKaro" }],
+  keywords: [
+    "document vault",
+    "personal documents",
+    "privacy",
+    "expiry tracking",
+    "portfolio",
+  ],
   openGraph: {
-    title: "Lockerr — your private document vault",
+    title: "LockKaro — Lock it. Clock it.",
     description:
-      "A calm, private vault for the documents that matter. Portfolio project by @bhavy67.",
+      "A calm, private vault for the paperwork of your life. All in one place.",
     type: "website",
-    siteName: "Lockerr",
+    siteName: "LockKaro",
     url: siteUrl,
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lockerr — your private document vault",
+    title: "LockKaro — Lock it. Clock it.",
     description:
-      "A calm, private vault for the documents that matter. Portfolio project.",
+      "A calm, private vault for the paperwork of your life. All in one place.",
   },
   // Portfolio project — indexable so recruiters can find it.
   robots: { index: true, follow: true },
