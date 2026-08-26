@@ -23,9 +23,9 @@ The current build ships **Phases 0–6**:
 - ✅ **Phase 4** — visual **timeline** grouped by month (uploads, updates, favorites, document dates, expiries, reminders) with sticky headers; **reminders** with Soon / Later / Expired / All tabs, days-remaining prominence, and a summary strip; live count badge on the Expiring nav item
 - ✅ **Phase 5 — Polish** — motion pass (Framer Motion stagger on the document grid, animated expand for upload metadata, favorite-star spring pop), a11y pass (skip-link, `aria-live` upload status, sidebar landmarks, always-visible actions on touch), **Vitest** suite (67 tests) covering utils/expiry/timeline/mapper helpers, **Playwright** smoke tests for signup + keyboard shortcut flow
 - ✅ **Phase 6 — Real backend** — Supabase Postgres, Auth and Storage behind `NEXT_PUBLIC_DATA_MODE=supabase`; migrations with row level security on every table, a private bucket reachable only through short-lived signed URLs, real per-file upload progress. The browser-local mock stays the default and the first-run experience.
-- ✅ **Phase 7.1 — Text extraction** — Every document uploaded now gets its text extracted client-side: PDF.js reads embedded text layers, Tesseract.js OCRs images, all off the main thread. A new **Content** tab on document detail shows the extracted text with copy + re-extract actions. Storage lives in a new `document_texts` table with a GIN-indexed `tsvector` column, reserved for the semantic search work coming in 7.4.
+- ✅ **Phase 7.1 — Text extraction** — Every document uploaded gets its text extracted **client-side**: PDF.js reads embedded text layers, Tesseract.js OCRs images, all off the main thread. Nothing is sent to a server. A new **Content** tab on document detail shows the extracted text with copy + re-extract actions. Storage lives in a new `document_texts` table with a GIN-indexed `tsvector` column, ready for Postgres full-text search whenever we want it.
 
-**Roadmap (not yet built):** AI-suggested metadata (7.2), auto-classify on upload (7.3), semantic search via pgvector (7.4), Ask Lockerr RAG (7.5), custom categories. See [Roadmap](#roadmap).
+**Roadmap (not yet built):** custom categories, bulk actions, richer sample data seeding, live deployment + screenshots. Cloud AI features (Ask Lockerr, semantic embeddings, auto-classification) are explicitly out of scope — the project stays private-by-default with no third-party APIs.
 
 ---
 
@@ -89,20 +89,19 @@ lockerr/
 
 ## Screenshots
 
-Place captures in `docs/screenshots/` and reference them here.
+![Landing](docs/screenshots/landing.png)
+![Dashboard](docs/screenshots/dashboard.png)
+![Vault](docs/screenshots/vault-grid.png)
+![Document detail](docs/screenshots/document.png)
+![Timeline](docs/screenshots/timeline.png)
+![Reminders](docs/screenshots/reminders.png)
+![Command palette](docs/screenshots/palette.png)
+![Mobile](docs/screenshots/mobile.png)
 
-| View          | Path                                  |
-| ------------- | ------------------------------------- |
-| Landing       | `docs/screenshots/landing.png`        |
-| Dashboard     | `docs/screenshots/dashboard.png`      |
-| Vault (grid)  | `docs/screenshots/vault-grid.png`     |
-| Document      | `docs/screenshots/document.png`       |
-| Timeline      | `docs/screenshots/timeline.png`       |
-| Reminders     | `docs/screenshots/reminders.png`      |
-| Command palette | `docs/screenshots/palette.png`      |
-| Mobile        | `docs/screenshots/mobile.png`         |
-
-Suggested capture size: **1440×900** for desktop views, **390×844** (iPhone 14) for mobile.
+Screenshots that don't exist yet won't render — they'll show as broken image
+placeholders on GitHub. See [`docs/screenshots/README.md`](docs/screenshots/README.md)
+for capture setup and sizing, or [`DEPLOYMENT.md`](DEPLOYMENT.md) if you're
+running through the live-deploy checklist.
 
 ---
 
@@ -129,6 +128,11 @@ Optional. The app is fully usable without it.
 
 See [`supabase/README.md`](supabase/README.md) for the details, including the
 security model.
+
+### Deploy to production
+
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) — end-to-end Vercel + Supabase walkthrough
+that gets you a live URL in about 30 minutes.
 
 ### Scripts
 
@@ -256,18 +260,20 @@ prove.
 - [x] **Phase 5 — Polish**: motion pass, a11y improvements, Vitest suite, Playwright smoke tests, screenshots scaffold
 - [x] **Phase 6 — Real backend**: Supabase Postgres + Storage + Auth, RLS policies, migrations
 - [x] **Phase 7.1 — Text extraction**: client-side PDF.js + Tesseract.js, `document_texts` table, Content tab
-- [ ] **Phase 7.2 — Suggested metadata**: `AiProvider` abstraction (Anthropic implementation), "Suggest details" review flow
-- [ ] **Phase 7.3 — Auto-classify on upload**
-- [ ] **Phase 7.4 — Semantic search (pgvector)**
-- [ ] **Phase 7.5 — Ask Lockerr (RAG Q&A)**
+
+**Cloud AI is intentionally out of scope.** Suggested metadata, semantic search,
+and RAG Q&A were on the original plan but relied on a paid LLM provider. The
+project stays private-by-default: everything happens either in the user's
+browser or in the user's own Supabase project — no third-party model APIs.
+
+Open threads worth doing next (all free of any external service):
+
+- [ ] Deploy to Vercel + a hosted Supabase project, capture the screenshots referenced above
+- [ ] User-created categories (icon + color picker)
+- [ ] Bulk actions in the vault (multi-select archive / delete / move to collection)
+- [ ] "Load sample data" button for demos and first-run
 
 Each phase is designed to leave the app in a shippable, working state.
-
----
-
-## Screenshots
-
-_To be added after Phase 3._
 
 ---
 

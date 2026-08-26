@@ -31,10 +31,25 @@ The core loop: **upload → understand → organize → search → preview → t
 | 5     | ✅     | Motion pass (Framer Motion stagger + spring pop), a11y pass, Vitest suite, Playwright smoke                   |
 | 6     | ✅     | Real Supabase backend behind `NEXT_PUBLIC_DATA_MODE=supabase` — schema, RLS, storage, auth, middleware       |
 | 7.1   | ✅     | Client-side text extraction: PDF.js for embedded PDF text, Tesseract.js OCR for images. New `document_texts` table + `Content` tab. Auto-runs after upload; manual trigger on existing docs. |
-| **7.2** | **⏳** | **AiProvider abstraction + Anthropic implementation.** "Extract details" reviews suggested title / category / tags / dates before applying — no silent writes. Provider chosen: **Anthropic** (Claude + Voyage embeddings). |
-| 7.3   | ⏳     | Auto-classify on upload (toggle) — runs 7.2 in background, suggestion badge on document                       |
-| 7.4   | ⏳     | Semantic search via pgvector — embed on upload, similarity RPC, "Ask" mode in ⌘K                              |
-| 7.5   | ⏳     | Ask Lockerr (RAG Q&A) — chat with citations back to source documents                                          |
+
+**Phases 7.2–7.5 are deferred indefinitely.** The original plan called for a
+hosted LLM (Anthropic / Voyage) — user has decided not to spend on paid AI, and
+we haven't found a browser-only path that's worth building. Do **not** add
+`@anthropic-ai/sdk`, an `AiProvider` interface, or `apps/web/app/api/ai/*`
+Route Handlers unless the user explicitly reopens this decision.
+
+If we ever revisit the intelligence layer, three viable free paths — none has
+been chosen:
+
+- **Rule-based metadata extraction.** No ML. Regex date extraction (via
+  `chrono-node`), category guesses from filename patterns, vendor extracted
+  from header lines. Cheap, deterministic, unimpressive.
+- **Client-side semantic search.** `@xenova/transformers` (Transformers.js)
+  runs sentence-transformers models in the browser (~25 MB WASM). All data
+  stays local. Would need pgvector migration on the Supabase side plus a
+  browser fallback for mock mode.
+- **Local LLM.** Ollama or `mlc-ai/web-llm`. Only really works for people
+  running a model server; not portable enough for a portfolio demo.
 
 ---
 
@@ -334,7 +349,7 @@ is untouched and still the default.
 
 ---
 
-## Phase 7 — what shipped (7.1) and what's next (7.2+)
+## Phase 7 — what shipped (7.1) and what stopped
 
 ### 7.1 — Text extraction ✅
 
@@ -345,11 +360,13 @@ is untouched and still the default.
   unpkg (version-matched, browser-cached) — no webpack config needed.
 - **Images**: `tesseract.js` OCR runs on its own worker thread with the English
   language pack (auto-downloaded, ~4MB, cached).
-- **Scanned PDFs are out of scope for 7.1** — they hit `status: "empty"` today.
-  OCR-of-PDF-pages ships in 7.5 (render each page to canvas, feed to Tesseract).
+- **Scanned PDFs are out of scope** — they hit `status: "empty"` today. Rendering
+  each page to canvas and feeding it to Tesseract would work but wasn't worth
+  the code weight for a rare case; revisit if a real user hits it.
 - New table `document_texts` (migration `20260826000007_document_texts.sql`)
-  keyed on `document_id`, with generated `content_tsv` + GIN index reserved
-  for Phase 7.4 semantic search.
+  keyed on `document_id`, with generated `content_tsv` + GIN index. The tsvector
+  column costs almost nothing today and would unlock Postgres full-text search
+  cheaply if we ever want it.
 - Extraction is queued (one at a time, in-memory) via `features/extraction/queue.ts`.
   UI shows spinner via `useIsExtracting(documentId)`.
 - Manual "Extract text" button on any document without content — fetches the
@@ -358,51 +375,21 @@ is untouched and still the default.
 - `Content` tab on document detail. States: `not_extracted`, `processing`,
   `done`, `empty`, `failed`.
 
-### 7.2 — AI provider abstraction (next up)
+### Phases 7.2–7.5 — deferred, do not build
 
-Locked-in decisions from user:
-- Provider: **Anthropic** (Claude for chat + Voyage AI for embeddings).
-- Interface + real impl + mock. Mock is what E2E and 7.1 tests run against.
-- Route Handler in `apps/web/app/api/ai/*` (server-only — never expose the key
-  to the browser). This is the first genuinely server-side surface in the app.
+The original plan called for a paid LLM (Anthropic + Voyage). The user has
+decided against spending on AI infrastructure. **Do not** build any of the
+following without an explicit reopen:
 
-Plan for 7.2:
+- `AiProvider` interface or `apps/web/src/lib/ai/*`
+- `@anthropic-ai/sdk` or `openai` npm dependency
+- `apps/web/app/api/ai/*` Route Handlers
+- `ANTHROPIC_API_KEY` / `VOYAGE_API_KEY` env vars
+- pgvector migration or embedding pipelines
 
-1. Add `AiProvider` interface at `apps/web/src/lib/ai/provider.ts`:
-   ```ts
-   interface AiProvider {
-     suggestMetadata(input: {
-       text: string;
-       fileName: string;
-       categories: Category[];
-     }): Promise<SuggestedMetadata>;
-     embed(text: string): Promise<number[]>;
-     chat(messages: Message[], context: Chunk[]): Promise<ChatResponse>;
-   }
-   ```
-2. Two impls: `AnthropicAiProvider` (uses `@anthropic-ai/sdk` + Voyage HTTP API
-   via server-side handler), `MockAiProvider` (deterministic, seeded by hash of
-   input — used by tests and by first-run experience).
-3. Route Handlers `app/api/ai/suggest/route.ts`, `app/api/ai/embed/route.ts`,
-   `app/api/ai/chat/route.ts`. Each authenticates via Supabase session cookie
-   before calling out — never trust anonymous.
-4. Env: `ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`. Add to `.env.example`, document
-   in supabase README.
-5. UI: "Suggest details" button in document details form. Reviews suggestions
-   in a diff-style layout — user accepts one field at a time. **Never silent
-   writes** (per spec).
-6. Rate limiting: cheap per-session counter in the Route Handler. Real limits
-   land later.
-
-**Non-goals for 7.2**: auto-classify on upload (that's 7.3), semantic search
-(7.4), chat/RAG (7.5). Don't ship those together.
-
-### When Fastify (`apps/api`) starts earning its weight
-
-Not in 7.2. Route Handlers are enough while the AI calls are per-request and
-short. When 7.4/7.5 introduce embedding jobs that run for minutes across many
-documents, or scheduled reminder delivery, or webhook fan-out, that's the
-moment to introduce Fastify. Not before.
+If the user reopens the intelligence question, the free alternatives worth
+weighing are listed in the status table above. Pick one and get a fresh
+decision before writing code.
 
 ---
 
