@@ -15,20 +15,37 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     }
   }, [isLoading, user, router]);
 
-  if (isLoading || !user) {
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        className="flex min-h-svh items-center justify-center"
-      >
-        <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <LogoMark className="animate-pulse" size={28} />
-          <p className="text-xs">Opening your vault…</p>
-        </div>
-      </div>
-    );
+  // Two very different states:
+  //  - isLoading: we don't yet know who this is → verifying session
+  //  - !isLoading && !user: we know there's nobody → sending them out
+  // Same visual shell, different copy, different affordance (pulse vs. static).
+  if (isLoading) {
+    return <TransitionScreen text="Opening your vault…" pulsing />;
+  }
+  if (!user) {
+    return <TransitionScreen text="Locking your vault." />;
   }
 
   return <>{children}</>;
+}
+
+function TransitionScreen({
+  text,
+  pulsing = false,
+}: {
+  text: string;
+  pulsing?: boolean;
+}) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex min-h-svh items-center justify-center"
+    >
+      <div className="flex flex-col items-center gap-3 text-muted-foreground">
+        <LogoMark className={pulsing ? "animate-pulse" : undefined} size={28} />
+        <p className="text-xs">{text}</p>
+      </div>
+    </div>
+  );
 }
