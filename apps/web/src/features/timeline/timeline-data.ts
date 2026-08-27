@@ -1,5 +1,5 @@
 import { format, isThisYear } from "date-fns";
-import type { ActivityEvent, DocumentRecord } from "@lockerr/types";
+import type { ActivityEvent, DocumentRecord } from "@lockkaro/types";
 
 export type TimelineEventKind =
   | "uploaded"

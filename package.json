@@ -1,19 +1,19 @@
 {
-  "name": "lockerr",
+  "name": "lockkaro",
   "version": "0.1.0",
   "private": true,
-  "description": "Lockerr — a private personal document vault",
+  "description": "LockKaro — a private personal document vault",
   "packageManager": "pnpm@11.24.0",
   "scripts": {
-    "dev": "pnpm --filter @lockerr/web dev",
-    "build": "pnpm --filter @lockerr/web build",
-    "start": "pnpm --filter @lockerr/web start",
-    "lint": "pnpm --filter @lockerr/web lint",
+    "dev": "pnpm --filter @lockkaro/web dev",
+    "build": "pnpm --filter @lockkaro/web build",
+    "start": "pnpm --filter @lockkaro/web start",
+    "lint": "pnpm --filter @lockkaro/web lint",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm --filter @lockerr/web test",
-    "test:watch": "pnpm --filter @lockerr/web test:watch",
-    "e2e": "pnpm --filter @lockerr/web e2e",
-    "e2e:install": "pnpm --filter @lockerr/web e2e:install"
+    "test": "pnpm --filter @lockkaro/web test",
+    "test:watch": "pnpm --filter @lockkaro/web test:watch",
+    "e2e": "pnpm --filter @lockkaro/web e2e",
+    "e2e:install": "pnpm --filter @lockkaro/web e2e:install"
   },
   "engines": {
     "node": ">=20"

@@ -1,5 +1,5 @@
 {
-  "extends": "@lockerr/config/tsconfig.base.json",
+  "extends": "@lockkaro/config/tsconfig.base.json",
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "ES2022"],
     "jsx": "preserve",

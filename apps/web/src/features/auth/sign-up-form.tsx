@@ -5,7 +5,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { signUpSchema, type SignUpInput } from "@lockerr/validation";
+import { signUpSchema, type SignUpInput } from "@lockkaro/validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

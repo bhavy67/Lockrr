@@ -1,4 +1,4 @@
-import type { ExtractionMethod } from "@lockerr/types";
+import type { ExtractionMethod } from "@lockkaro/types";
 
 /**
  * What an extractor returns. The queue turns this into a saveDocumentText call.

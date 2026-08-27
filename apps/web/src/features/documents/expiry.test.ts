@@ -1,6 +1,6 @@
 import { addDays } from "date-fns";
 import { describe, expect, it } from "vitest";
-import type { DocumentRecord } from "@lockerr/types";
+import type { DocumentRecord } from "@lockkaro/types";
 import {
   attentionCount,
   daysUntilExpiry,

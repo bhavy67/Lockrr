@@ -1,7 +1,7 @@
 # Supabase CLI configuration for the local stack (`supabase start`).
 # Values not listed here fall back to the CLI defaults.
 
-project_id = "lockerr"
+project_id = "lockkaro"
 
 [api]
 enabled = true
@@ -20,8 +20,8 @@ port = 54323
 
 [storage]
 enabled = true
-# 25 MB, matches MAX_FILE_SIZE_BYTES in @lockerr/validation.
-file_size_limit = "25MiB"
+# 5 MB, matches MAX_FILE_SIZE_BYTES in @lockkaro/validation.
+file_size_limit = "5MiB"
 
 [auth]
 enabled = true

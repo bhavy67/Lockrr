@@ -19,7 +19,7 @@ import {
   ACCEPTED_MIME_TYPES,
   MAX_FILE_SIZE_BYTES,
   isAcceptedMimeType,
-} from "@lockerr/validation";
+} from "@lockkaro/validation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

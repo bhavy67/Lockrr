@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FolderOpen } from "lucide-react";
-import type { Category, DocumentRecord } from "@lockerr/types";
+import type { Category, DocumentRecord } from "@lockkaro/types";
 import { cn } from "@/lib/utils";
 
 interface Props {

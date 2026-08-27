@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import type { Category, DocumentRecord } from "@lockerr/types";
+import type { Category, DocumentRecord } from "@lockkaro/types";
 import { DocumentCard } from "./document-card";
 
 interface Props {

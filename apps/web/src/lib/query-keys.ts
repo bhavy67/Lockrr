@@ -1,4 +1,4 @@
-import type { DocumentFilters } from "@lockerr/types";
+import type { DocumentFilters } from "@lockkaro/types";
 
 export const qk = {
   session: ["session"] as const,

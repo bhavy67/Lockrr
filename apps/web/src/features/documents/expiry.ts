@@ -1,5 +1,5 @@
 import { differenceInCalendarDays } from "date-fns";
-import type { DocumentRecord } from "@lockerr/types";
+import type { DocumentRecord } from "@lockkaro/types";
 
 export type ExpiryStatus = "none" | "expired" | "soon" | "later" | "active";
 

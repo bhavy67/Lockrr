@@ -4,7 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Star } from "lucide-react";
 import Link from "next/link";
-import type { Category, DocumentRecord } from "@lockerr/types";
+import type { Category, DocumentRecord } from "@lockkaro/types";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatBytes } from "@/lib/utils";
 import { DocumentActionsMenu } from "./document-actions";

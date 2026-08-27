@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- Lockerr — core schema
+-- LockKaro — core schema
 --
 -- Every table is scoped by user_id and carries row level security. There is no
 -- shared data in this product: a row belongs to exactly one person, and the

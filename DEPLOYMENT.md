@@ -67,10 +67,11 @@ Estimated time: **~30 minutes** if you already have accounts, ~45 with signups.
      into the vault. (You can leave it on for a stricter demo — you'll just
      need to click a confirmation email.)
 
-5. Optional but recommended: bump the file upload limit for the `documents`
-   bucket to at least **25 MB** in **Storage → Policies → documents → Bucket
-   settings** if it's not already there. The app's client-side validation caps
-   at 25 MB; matching the bucket avoids confusing errors.
+5. The `documents` bucket ships with a **5 MB** per-file cap (matched by
+   client-side validation in `@lockkaro/validation`). Nothing to configure by
+   hand — the migrations set it. If you ever change it, update the bucket
+   `file_size_limit` and `MAX_FILE_SIZE_BYTES` together so client and server
+   agree.
 
 See `supabase/README.md` for more depth on the schema and security model.
 
@@ -107,7 +108,7 @@ See `supabase/README.md` for more depth on the schema and security model.
    the build log:
    - `pnpm install` — should complete without prompting for `pnpm approve-builds`
      because we've listed all native builds in `pnpm-workspace.yaml`.
-   - `pnpm --filter @lockerr/web build` — the actual Next.js build.
+   - `pnpm --filter @lockkaro/web build` — the actual Next.js build.
    - Deployment.
 
 6. Once deployment succeeds, Vercel gives you the URL. **Come back to your env

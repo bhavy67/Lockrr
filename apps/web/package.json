@@ -1,5 +1,5 @@
 {
-  "name": "@lockerr/web",
+  "name": "@lockkaro/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
-    "@lockerr/types": "workspace:*",
-    "@lockerr/validation": "workspace:*",
+    "@lockkaro/types": "workspace:*",
+    "@lockkaro/validation": "workspace:*",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -58,7 +58,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@lockerr/config": "workspace:*",
+    "@lockkaro/config": "workspace:*",
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",

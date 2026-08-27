@@ -2,7 +2,7 @@
 
 import { Check, Plus, Tag as TagIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { Tag } from "@lockerr/types";
+import type { Tag } from "@lockkaro/types";
 import { Button } from "@/components/ui/button";
 import {
   Command,

@@ -2,7 +2,7 @@
 
 import { FolderOpen, LayoutGrid, List, Search, Star, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { DocumentFilters, DocumentSort, DocumentView } from "@lockerr/types";
+import type { DocumentFilters, DocumentSort, DocumentView } from "@lockkaro/types";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";

@@ -1,5 +1,5 @@
 {
-  "name": "@lockerr/types",
+  "name": "@lockkaro/types",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,6 +13,6 @@
   },
   "devDependencies": {
     "typescript": "^5.6.3",
-    "@lockerr/config": "workspace:*"
+    "@lockkaro/config": "workspace:*"
   }
 }

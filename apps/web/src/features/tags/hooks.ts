@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Tag } from "@lockerr/types";
+import type { Tag } from "@lockkaro/types";
 import { data } from "@/lib/data";
 import { qk } from "@/lib/query-keys";
 

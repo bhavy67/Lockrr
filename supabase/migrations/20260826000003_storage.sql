@@ -15,7 +15,9 @@ values (
   'documents',
   'documents',
   false,
-  26214400, -- 25 MB, matches MAX_FILE_SIZE_BYTES in @lockerr/validation
+  26214400, -- 25 MB. Later shrunk to 5 MB by 20260827000001_shrink_upload_limit.
+            -- Kept as-is here so history reads chronologically — a fresh reset
+            -- lands at 25 MB first, then the shrink migration overrides.
   array[
     'application/pdf',
     'image/jpeg',

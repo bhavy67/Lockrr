@@ -1,6 +1,6 @@
 import { differenceInCalendarDays, format } from "date-fns";
 import { CalendarClock } from "lucide-react";
-import type { DocumentRecord } from "@lockerr/types";
+import type { DocumentRecord } from "@lockkaro/types";
 import { Badge } from "@/components/ui/badge";
 
 export function ExpiryBadge({

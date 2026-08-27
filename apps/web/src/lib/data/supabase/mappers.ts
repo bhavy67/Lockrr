@@ -12,7 +12,7 @@ import type {
   Reminder,
   Tag,
   User,
-} from "@lockerr/types";
+} from "@lockkaro/types";
 
 import type {
   ActivityRow,

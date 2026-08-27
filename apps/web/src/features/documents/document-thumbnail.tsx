@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { DocumentRecord } from "@lockerr/types";
+import type { DocumentRecord } from "@lockkaro/types";
 import { DocumentIcon, documentKind } from "./document-icon";
 import { data } from "@/lib/data";
 import { cn } from "@/lib/utils";

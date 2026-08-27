@@ -1,5 +1,5 @@
 {
-  "extends": "@lockerr/config/tsconfig.base.json",
+  "extends": "@lockkaro/config/tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true
   },

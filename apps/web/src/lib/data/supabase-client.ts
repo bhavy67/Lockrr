@@ -12,7 +12,7 @@ import type {
   Reminder,
   Tag,
   User,
-} from "@lockerr/types";
+} from "@lockkaro/types";
 
 import { sanitizeFileName, stripExtension } from "@/lib/utils";
 import type {
@@ -25,7 +25,7 @@ import {
   DOCUMENTS_BUCKET,
   getSupabase,
   supabaseEnv,
-  type LockerrSupabaseClient,
+  type LockKaroSupabaseClient,
 } from "./supabase/browser-client";
 import type { DocumentRowWithJoins } from "./supabase/database.types";
 import {
@@ -78,7 +78,7 @@ function uuid(): string {
 }
 
 class SupabaseDataClient implements DataClient {
-  private get sb(): LockerrSupabaseClient {
+  private get sb(): LockKaroSupabaseClient {
     return getSupabase();
   }
 

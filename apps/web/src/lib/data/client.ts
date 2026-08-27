@@ -10,7 +10,7 @@ import type {
   Reminder,
   Tag,
   User,
-} from "@lockerr/types";
+} from "@lockkaro/types";
 
 export interface AuthResult {
   user: User;

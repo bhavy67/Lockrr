@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import type { DocumentText } from "@lockerr/types";
+import type { DocumentText } from "@lockkaro/types";
 import { data } from "@/lib/data";
 import { qk } from "@/lib/query-keys";
 import { bindQueryInvalidator, useExtractionQueue } from "./queue";

@@ -13,10 +13,10 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.86.0(react@19.2.8))
-      '@lockerr/types':
+      '@lockkaro/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@lockerr/validation':
+      '@lockkaro/validation':
         specifier: workspace:*
         version: link:../../packages/validation
       '@radix-ui/react-avatar':
@@ -134,7 +134,7 @@ importers:
         specifier: ^5.0.2
         version: 5.0.15(@types/react@19.2.18)(react@19.2.8)
     devDependencies:
-      '@lockerr/config':
+      '@lockkaro/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@playwright/test':
@@ -181,7 +181,7 @@ importers:
 
   packages/types:
     devDependencies:
-      '@lockerr/config':
+      '@lockkaro/config':
         specifier: workspace:*
         version: link:../config
       typescript:
@@ -194,7 +194,7 @@ importers:
         specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
-      '@lockerr/config':
+      '@lockkaro/config':
         specifier: workspace:*
         version: link:../config
       typescript:

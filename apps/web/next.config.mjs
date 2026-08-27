@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@lockerr/types", "@lockerr/validation"],
+  transpilePackages: ["@lockkaro/types", "@lockkaro/validation"],
   // Hide the Next.js dev overlay indicator (the floating "N" badge). Prod is
   // unaffected — it only ever renders during `next dev`.
   devIndicators: false,

@@ -2,7 +2,7 @@
 
 import { ArrowUpDown, Filter, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
-import type { DocumentFilters, DocumentSort } from "@lockerr/types";
+import type { DocumentFilters, DocumentSort } from "@lockkaro/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {

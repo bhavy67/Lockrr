@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "./database.types";
 
-export type LockerrSupabaseClient = SupabaseClient<Database>;
+export type LockKaroSupabaseClient = SupabaseClient<Database>;
 
 export const DOCUMENTS_BUCKET = "documents";
 
@@ -28,13 +28,13 @@ export function supabaseEnv(): { url: string; anonKey: string } {
   return { url, anonKey };
 }
 
-let client: LockerrSupabaseClient | null = null;
+let client: LockKaroSupabaseClient | null = null;
 
 /**
  * One client per tab. `createBrowserClient` keeps the session in cookies, so
  * middleware can refresh it and server code can read it.
  */
-export function getSupabase(): LockerrSupabaseClient {
+export function getSupabase(): LockKaroSupabaseClient {
   if (!client) {
     const { url, anonKey } = supabaseEnv();
     client = createBrowserClient<Database>(url, anonKey);

@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
  * The mock data layer persists to localStorage / IndexedDB inside the browser
  * context, which Playwright isolates per test, so no cleanup is needed.
  */
-test.describe("Lockerr smoke", () => {
+test.describe("LockKaro smoke", () => {
   test("signs up and reaches the dashboard", async ({ page }) => {
     await page.goto("/");
     await expect(

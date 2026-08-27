@@ -152,12 +152,12 @@ pnpm lint          # ESLint on the web app
 
 ```bash
 # Unit tests — pure helpers (utils, expiry, timeline). Fast, no browser.
-pnpm --filter @lockerr/web test
-pnpm --filter @lockerr/web test:watch
+pnpm --filter @lockkaro/web test
+pnpm --filter @lockkaro/web test:watch
 
 # End-to-end (Playwright + Chromium). One-time browser install:
-pnpm --filter @lockerr/web e2e:install
-pnpm --filter @lockerr/web e2e
+pnpm --filter @lockkaro/web e2e:install
+pnpm --filter @lockkaro/web e2e
 ```
 
 E2E tests boot their own Next server on port 3100, sign a new user up (mock auth, no cleanup needed — each test gets an isolated browser context), and verify a couple of core flows. Extend `apps/web/e2e/*.spec.ts` as new critical paths land.
@@ -248,7 +248,7 @@ boundary, not a second line of defence behind one.
 - Storage paths are generated, never client-supplied, and file names are
   sanitized so they cannot introduce a path separator.
 - File type and size limits are enforced by the client and again by the bucket
-  (25 MB; PDF and common image types only).
+  (5 MB; PDF and common image types only).
 - Secure response headers, configured in `next.config.mjs`.
 
 Explicit non-goals in either mode: custom cryptography, "zero-knowledge"

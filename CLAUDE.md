@@ -12,7 +12,7 @@ A private, personal document vault. Users upload, organize, preview, search, and
 **Product name**: LockKaro. The name is Hinglish (Lock + Karo, "lock it"), but that's the only Hindi anywhere in the product — see Voice below. Wordmark uses weight contrast: "Lock" medium, "Karo" bold.
 **Tagline**: *"Lock it. Clock it."* — the two verbs name the product's two headline features: private storage (lock) and expiry tracking / timeline (clock).
 **Voice**: **All copy is English.** Landing, in-product, metadata, docs — every string is English. The brand name itself is the only Hinglish element in the product. Explicit user call in Aug 2026 after a first pass drifted into Hindi phrases ("Sab kuch, ek jagah", "Aap ke documents") — do not reintroduce even briefly. India-specific proper nouns (Aadhaar, PAN, LIC, PUC) were also stripped from copy at the same time; use globally recognizable examples (passport, driving license, insurance, degree, rent agreement).
-**Legacy note**: The project was originally called "Lockerr". Internal package IDs (`@lockerr/*`) and a couple of internal type names (`LockerrSupabaseClient`) were **not** renamed — invisible to users, mechanical churn without payoff. Do not rename them without a real reason.
+**Legacy note**: The project was originally called "Lockerr". Renamed to LockKaro in Aug 2026, and the internal identifiers (`@lockkaro/*` packages, `LockKaroSupabaseClient` type, root workspace name) were renamed a day later. The **only** places the old name still appears are the mock client's localStorage key prefix (`lockerr.*`) and its IndexedDB database name (`lockerr-files`) — those are deliberate: changing them would silently erase every local-mode user's data on their next visit. If you ever change them, add a one-shot browser-side migration that reads the old keys and writes them under the new prefix, then deletes the old ones.
 
 The core loop: **upload → understand → organize → search → preview → track → retrieve.**
 
@@ -79,7 +79,7 @@ against a real backend instead, see `supabase/README.md`.
 ## Architecture
 
 ```
-lockerr/
+lockkaro/
 ├── apps/web/                      Next.js 15 App Router. Everything user-facing.
 │   └── src/
 │       ├── app/
@@ -98,9 +98,9 @@ lockerr/
 │           ├── query-keys.ts
 │           └── utils.ts
 ├── packages/
-│   ├── types/                     @lockerr/types — shared domain types
-│   ├── validation/                @lockerr/validation — shared Zod schemas
-│   └── config/                    @lockerr/config — tsconfig.base.json
+│   ├── types/                     @lockkaro/types — shared domain types
+│   ├── validation/                @lockkaro/validation — shared Zod schemas
+│   └── config/                    @lockkaro/config — tsconfig.base.json
 └── supabase/                      Migrations, RLS policies, storage bucket
 ```
 

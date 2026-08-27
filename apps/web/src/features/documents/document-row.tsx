@@ -3,7 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { Star } from "lucide-react";
 import Link from "next/link";
-import type { Category, DocumentRecord, Tag } from "@lockerr/types";
+import type { Category, DocumentRecord, Tag } from "@lockkaro/types";
 import { TagChip } from "@/features/tags/tag-chip";
 import { cn, formatBytes } from "@/lib/utils";
 import { DocumentActionsMenu } from "./document-actions";

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { DocumentRecord } from "@lockerr/types";
+import type { DocumentRecord } from "@lockkaro/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

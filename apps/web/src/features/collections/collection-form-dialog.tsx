@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import type { Collection } from "@lockerr/types";
+import type { Collection } from "@lockkaro/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

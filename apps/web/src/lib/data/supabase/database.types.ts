@@ -1,5 +1,5 @@
 /**
- * Shape of the Lockerr database, as the PostgREST client sees it.
+ * Shape of the LockKaro database, as the PostgREST client sees it.
  *
  * Hand-written to match `supabase/migrations/`. Regenerate with:
  *

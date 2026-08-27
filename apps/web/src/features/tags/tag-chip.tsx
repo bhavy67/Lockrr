@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { Tag } from "@lockerr/types";
+import type { Tag } from "@lockkaro/types";
 import { cn } from "@/lib/utils";
 
 interface Props {

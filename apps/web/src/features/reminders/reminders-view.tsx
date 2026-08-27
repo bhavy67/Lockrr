@@ -4,7 +4,7 @@ import { differenceInCalendarDays, format } from "date-fns";
 import { CalendarClock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { DocumentRecord } from "@lockerr/types";
+import type { DocumentRecord } from "@lockkaro/types";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

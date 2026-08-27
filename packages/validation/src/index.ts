@@ -8,7 +8,7 @@ export const ACCEPTED_MIME_TYPES = [
   "image/gif",
 ] as const;
 
-export const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB per file
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB per file
 
 export const signUpSchema = z
   .object({

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ActivityEvent, DocumentRecord } from "@lockerr/types";
+import type { ActivityEvent, DocumentRecord } from "@lockkaro/types";
 import { buildTimeline, groupByMonth } from "./timeline-data";
 
 function activity(
