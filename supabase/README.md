@@ -40,6 +40,23 @@ supabase db push
 
 Read the URL and anon key off the project's API settings page.
 
+**Set the Auth URL configuration before the first real sign-up.** Dashboard →
+Authentication → URL Configuration:
+
+- **Site URL** → the app's real origin (e.g. `https://lockkaro.vercel.app`).
+- **Redirect URLs** → add `<that origin>/**`.
+
+A fresh project defaults Site URL to `http://localhost:3000`. Confirmation
+emails build their link from it, so until this is changed every confirmation
+link redirects to `localhost` and dies with `otp_expired` — a real, first-hand
+failure mode, not hypothetical: that's exactly what shipped and was caught the
+first time a real user tried to sign up against a hosted project. `signUp()`
+also passes `emailRedirectTo` explicitly (pointing at `/auth/callback`, which
+establishes the session and lands on `/dashboard`) so this is correct
+automatically in every environment on the allow list — prod and any preview
+deploy alike — but the allow list itself is dashboard-only; nothing in this
+repo can set it.
+
 Email confirmations are off in `config.toml` so that sign-up lands you in the
 vault immediately. That is a local convenience — turn them on for anything
 real.

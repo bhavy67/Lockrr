@@ -168,7 +168,18 @@ class SupabaseDataClient implements DataClient {
     const { data, error } = await this.sb.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName } },
+      options: {
+        data: { display_name: displayName },
+        // Explicit rather than relying solely on the project's Site URL
+        // setting in the Supabase dashboard: that's one global default,
+        // wrong for every environment but whichever one it's set to. This
+        // still has to be in the dashboard's Additional Redirect URLs allow
+        // list — Supabase rejects a redirect target that isn't — but at
+        // least it's correct automatically in every environment that is
+        // allow-listed, prod and any preview deploy alike, with nothing to
+        // remember to update by hand.
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     if (error) {
       if (/already registered|already exists/i.test(error.message)) {

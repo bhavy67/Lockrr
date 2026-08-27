@@ -302,6 +302,21 @@ looking complete. Caught before it reached a real project — see the fix and
 its comment in that file for what a table needs. Check this every time a
 migration runs `create table`, not just the first time.
 
+### 13. A fresh Supabase project's Site URL defaults to `localhost:3000`
+
+Not a migration, not something any file in this repo controls — a dashboard
+setting (Authentication → URL Configuration), and every confirmation email
+builds its link from it. Skip setting it and the first real sign-up against a
+hosted project gets a confirmation link that redirects to `localhost`, dies,
+and reports `otp_expired` — which reads like an expired-link problem but
+means the redirect target was never reachable. This is exactly what happened
+the first time a real user signed up. Set Site URL to the real origin and add
+`<that origin>/**` to Redirect URLs before anyone signs up for real; see
+`supabase/README.md`. `signUp()` also passes `emailRedirectTo` explicitly
+(`/auth/callback`) rather than depending solely on Site URL, so once the
+allow list is right this is correct automatically in every environment on
+it — but the allow list itself has no code-side substitute.
+
 ---
 
 ## Phase 6 — what shipped
