@@ -23,9 +23,8 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
       </header>
       <main className="flex-1">{children}</main>
       <footer className="border-t border-border/70">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:px-6">
-          <span>© {new Date().getFullYear()} Lockerr. Your documents, your control.</span>
-          <span className="font-mono">v0.1 · demo build</span>
+        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted-foreground sm:px-6">
+          <span>© {new Date().getFullYear()} LockKaro. Your documents, your control.</span>
         </div>
       </footer>
     </div>

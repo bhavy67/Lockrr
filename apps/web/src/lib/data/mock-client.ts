@@ -8,13 +8,19 @@ import type {
   DocumentFilters,
   DocumentRecord,
   DocumentSort,
+  DocumentText,
   Reminder,
   Tag,
   User,
 } from "@lockerr/types";
 
 import { sanitizeFileName, sleep, stripExtension } from "@/lib/utils";
-import type { AuthResult, DataClient, UploadInput } from "./client";
+import type {
+  AuthResult,
+  DataClient,
+  SaveDocumentTextInput,
+  UploadInput,
+} from "./client";
 import { deleteFile, getFile, putFile } from "./mock-storage";
 
 const KEYS = {
@@ -25,6 +31,7 @@ const KEYS = {
   collections: (uid: string) => `lockerr.collections.${uid}`,
   documents: (uid: string) => `lockerr.documents.${uid}`,
   activity: (uid: string) => `lockerr.activity.${uid}`,
+  documentTexts: (uid: string) => `lockerr.document_texts.${uid}`,
 } as const;
 
 type StoredUser = User & { passwordHash: string };
@@ -68,15 +75,17 @@ const DEFAULT_CATEGORIES: Array<
   Pick<Category, "name" | "slug" | "icon" | "color" | "sortOrder">
 > = [
   { name: "Identity", slug: "identity", icon: "id-card", color: "#6366F1", sortOrder: 1 },
-  { name: "Finance", slug: "finance", icon: "wallet", color: "#059669", sortOrder: 2 },
-  { name: "Insurance", slug: "insurance", icon: "shield", color: "#0EA5E9", sortOrder: 3 },
-  { name: "Healthcare", slug: "healthcare", icon: "heart-pulse", color: "#DC2626", sortOrder: 4 },
-  { name: "Education", slug: "education", icon: "graduation-cap", color: "#7C3AED", sortOrder: 5 },
-  { name: "Work", slug: "work", icon: "briefcase", color: "#0F766E", sortOrder: 6 },
-  { name: "Travel", slug: "travel", icon: "plane", color: "#F59E0B", sortOrder: 7 },
-  { name: "Home", slug: "home", icon: "house", color: "#EA580C", sortOrder: 8 },
-  { name: "Electronics", slug: "electronics", icon: "cpu", color: "#3B82F6", sortOrder: 9 },
-  { name: "Receipts", slug: "receipts", icon: "receipt", color: "#64748B", sortOrder: 10 },
+  { name: "Property", slug: "property", icon: "key-round", color: "#B45309", sortOrder: 2 },
+  { name: "Vehicle", slug: "vehicle", icon: "car", color: "#0D9488", sortOrder: 3 },
+  { name: "Finance", slug: "finance", icon: "wallet", color: "#059669", sortOrder: 4 },
+  { name: "Insurance", slug: "insurance", icon: "shield", color: "#0EA5E9", sortOrder: 5 },
+  { name: "Healthcare", slug: "healthcare", icon: "heart-pulse", color: "#DC2626", sortOrder: 6 },
+  { name: "Education", slug: "education", icon: "graduation-cap", color: "#7C3AED", sortOrder: 7 },
+  { name: "Work", slug: "work", icon: "briefcase", color: "#0F766E", sortOrder: 8 },
+  { name: "Travel", slug: "travel", icon: "plane", color: "#F59E0B", sortOrder: 9 },
+  { name: "Home", slug: "home", icon: "house", color: "#EA580C", sortOrder: 10 },
+  { name: "Electronics", slug: "electronics", icon: "cpu", color: "#3B82F6", sortOrder: 11 },
+  { name: "Receipts", slug: "receipts", icon: "receipt", color: "#64748B", sortOrder: 12 },
   { name: "Other", slug: "other", icon: "file", color: "#71717A", sortOrder: 99 },
 ];
 
@@ -514,6 +523,14 @@ class MockDataClient implements DataClient {
       KEYS.documents(user.id),
       docs.filter((d) => d.id !== id),
     );
+    const texts = read<Record<string, DocumentText>>(
+      KEYS.documentTexts(user.id),
+      {},
+    );
+    if (texts[id]) {
+      delete texts[id];
+      write(KEYS.documentTexts(user.id), texts);
+    }
     logActivity(user.id, "document.deleted", id, { title: doc.title });
   }
 
@@ -541,6 +558,43 @@ class MockDataClient implements DataClient {
 
   async listReminders(): Promise<Reminder[]> {
     return [];
+  }
+
+  // ---- Extraction (Phase 7.1) ----
+
+  async getDocumentText(documentId: string): Promise<DocumentText | null> {
+    const user = await currentUserOrThrow();
+    const map = read<Record<string, DocumentText>>(
+      KEYS.documentTexts(user.id),
+      {},
+    );
+    return map[documentId] ?? null;
+  }
+
+  async saveDocumentText(
+    input: SaveDocumentTextInput,
+  ): Promise<DocumentText> {
+    const user = await currentUserOrThrow();
+    const map = read<Record<string, DocumentText>>(
+      KEYS.documentTexts(user.id),
+      {},
+    );
+    const now = new Date().toISOString();
+    const isFinal =
+      input.status === "done" ||
+      input.status === "empty" ||
+      input.status === "failed";
+    const record: DocumentText = {
+      documentId: input.documentId,
+      status: input.status,
+      content: input.content,
+      characterCount: input.content?.length ?? 0,
+      extractionMethod: input.extractionMethod,
+      extractedAt: isFinal ? now : (map[input.documentId]?.extractedAt ?? null),
+    };
+    map[input.documentId] = record;
+    write(KEYS.documentTexts(user.id), map);
+    return record;
   }
 }
 

@@ -1,13 +1,18 @@
-# CLAUDE.md — Lockerr
+# CLAUDE.md — LockKaro
 
 > This file is loaded automatically at the start of every Claude Code session in this repo.
 > Read it once, then continue. It captures the decisions and traps that aren't obvious from the code alone.
 
 ---
 
-## What Lockerr is
+## What LockKaro is
 
-A private, personal document vault. Users upload, organize, preview, search, and track important paperwork (IDs, invoices, warranties, insurance, certificates). Portfolio-quality frontend project — **not a CRUD demo, not an admin dashboard**.
+A private, personal document vault. Users upload, organize, preview, search, and track important paperwork (IDs, insurance, degrees, warranties, receipts, property papers). Portfolio-quality frontend project — **not a CRUD demo, not an admin dashboard**.
+
+**Product name**: LockKaro. The name is Hinglish (Lock + Karo, "lock it"), but that's the only Hindi anywhere in the product — see Voice below. Wordmark uses weight contrast: "Lock" medium, "Karo" bold.
+**Tagline**: *"Lock it. Clock it."* — the two verbs name the product's two headline features: private storage (lock) and expiry tracking / timeline (clock).
+**Voice**: **All copy is English.** Landing, in-product, metadata, docs — every string is English. The brand name itself is the only Hinglish element in the product. Explicit user call in Aug 2026 after a first pass drifted into Hindi phrases ("Sab kuch, ek jagah", "Aap ke documents") — do not reintroduce even briefly. India-specific proper nouns (Aadhaar, PAN, LIC, PUC) were also stripped from copy at the same time; use globally recognizable examples (passport, driving license, insurance, degree, rent agreement).
+**Legacy note**: The project was originally called "Lockerr". Internal package IDs (`@lockerr/*`) and a couple of internal type names (`LockerrSupabaseClient`) were **not** renamed — invisible to users, mechanical churn without payoff. Do not rename them without a real reason.
 
 The core loop: **upload → understand → organize → search → preview → track → retrieve.**
 
@@ -30,7 +35,26 @@ The core loop: **upload → understand → organize → search → preview → t
 | 4     | ✅     | Visual timeline, reminders tabs (Soon/Later/Expired/All), expiring nav badge, dashboard insights             |
 | 5     | ✅     | Motion pass (Framer Motion stagger + spring pop), a11y pass, Vitest suite, Playwright smoke                   |
 | 6     | ✅     | Real Supabase backend behind `NEXT_PUBLIC_DATA_MODE=supabase` — schema, RLS, storage, auth, middleware       |
-| **7** | **⏳** | **Optional intelligence** (OCR, semantic search, Ask Lockerr) behind a provider abstraction                   |
+| 7.1   | ✅     | Client-side text extraction: PDF.js for embedded PDF text, Tesseract.js OCR for images. New `document_texts` table + `Content` tab. Auto-runs after upload; manual trigger on existing docs. |
+
+**Phases 7.2–7.5 are deferred indefinitely.** The original plan called for a
+hosted LLM (Anthropic / Voyage) — user has decided not to spend on paid AI, and
+we haven't found a browser-only path that's worth building. Do **not** add
+`@anthropic-ai/sdk`, an `AiProvider` interface, or `apps/web/app/api/ai/*`
+Route Handlers unless the user explicitly reopens this decision.
+
+If we ever revisit the intelligence layer, three viable free paths — none has
+been chosen:
+
+- **Rule-based metadata extraction.** No ML. Regex date extraction (via
+  `chrono-node`), category guesses from filename patterns, vendor extracted
+  from header lines. Cheap, deterministic, unimpressive.
+- **Client-side semantic search.** `@xenova/transformers` (Transformers.js)
+  runs sentence-transformers models in the browser (~25 MB WASM). All data
+  stays local. Would need pgvector migration on the Supabase side plus a
+  browser fallback for mock mode.
+- **Local LLM.** Ollama or `mlc-ai/web-llm`. Only really works for people
+  running a model server; not portable enough for a portfolio demo.
 
 ---
 
@@ -330,15 +354,47 @@ is untouched and still the default.
 
 ---
 
-## Phase 7 — what to build next
+## Phase 7 — what shipped (7.1) and what stopped
 
-Optional intelligence, all behind a provider abstraction, all opt-in:
+### 7.1 — Text extraction ✅
 
-- OCR on upload (Tesseract), text into `documents.search_tsv` — the column and
-  its GIN index are already there.
-- Semantic search (pgvector) and "Ask Lockerr".
-- This is the point where `apps/api` (Fastify) starts earning its weight —
-  background jobs, embeddings, scheduled reminder delivery. Not before.
+- Client-side text extraction runs in the browser after every upload. Zero
+  server code changes required in mock mode; no LLM API key required in either
+  mode.
+- **PDFs**: `pdfjs-dist` reads the embedded text layer. Worker loaded from
+  unpkg (version-matched, browser-cached) — no webpack config needed.
+- **Images**: `tesseract.js` OCR runs on its own worker thread with the English
+  language pack (auto-downloaded, ~4MB, cached).
+- **Scanned PDFs are out of scope** — they hit `status: "empty"` today. Rendering
+  each page to canvas and feeding it to Tesseract would work but wasn't worth
+  the code weight for a rare case; revisit if a real user hits it.
+- New table `document_texts` (migration `20260826000007_document_texts.sql`)
+  keyed on `document_id`, with generated `content_tsv` + GIN index. The tsvector
+  column costs almost nothing today and would unlock Postgres full-text search
+  cheaply if we ever want it.
+- Extraction is queued (one at a time, in-memory) via `features/extraction/queue.ts`.
+  UI shows spinner via `useIsExtracting(documentId)`.
+- Manual "Extract text" button on any document without content — fetches the
+  blob from `getDocumentUrl` (signed URL in supabase mode, blob URL in mock)
+  and enqueues.
+- `Content` tab on document detail. States: `not_extracted`, `processing`,
+  `done`, `empty`, `failed`.
+
+### Phases 7.2–7.5 — deferred, do not build
+
+The original plan called for a paid LLM (Anthropic + Voyage). The user has
+decided against spending on AI infrastructure. **Do not** build any of the
+following without an explicit reopen:
+
+- `AiProvider` interface or `apps/web/src/lib/ai/*`
+- `@anthropic-ai/sdk` or `openai` npm dependency
+- `apps/web/app/api/ai/*` Route Handlers
+- `ANTHROPIC_API_KEY` / `VOYAGE_API_KEY` env vars
+- pgvector migration or embedding pipelines
+
+If the user reopens the intelligence question, the free alternatives worth
+weighing are listed in the status table above. Pick one and get a fresh
+decision before writing code.
 
 ---
 

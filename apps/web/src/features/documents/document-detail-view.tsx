@@ -19,10 +19,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatBytes } from "@/lib/utils";
 import { DocumentActionsMenu } from "./document-actions";
+import { DocumentContentTab } from "./document-content-tab";
 import { DocumentDetailsForm } from "./document-details-form";
 import { documentKind } from "./document-icon";
 import { ExpiryBadge } from "./expiry-badge";
 import { useCategories, useDocument, useDocumentUrl, useUpdateDocument } from "./hooks";
+import { useDocumentText, useIsExtracting } from "@/features/extraction/hooks";
 import { ImagePreview } from "@/features/preview/image-preview";
 import { PdfPreview } from "@/features/preview/pdf-preview";
 
@@ -35,6 +37,8 @@ export function DocumentDetailView({ documentId }: Props) {
   const { data: doc, isLoading } = useDocument(documentId);
   const { data: url } = useDocumentUrl(documentId);
   const { data: categories = [] } = useCategories();
+  const { data: docText } = useDocumentText(documentId);
+  const isExtracting = useIsExtracting(documentId);
   const update = useUpdateDocument();
 
   const category = useMemo(
@@ -184,10 +188,22 @@ export function DocumentDetailView({ documentId }: Props) {
           <Tabs defaultValue="details">
             <TabsList>
               <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="content" className="gap-1.5">
+                Content
+                {isExtracting && (
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+                )}
+                {!isExtracting && docText?.status === "done" && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                )}
+              </TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
             <TabsContent value="details">
               <DocumentDetailsForm document={doc} />
+            </TabsContent>
+            <TabsContent value="content">
+              <DocumentContentTab document={doc} />
             </TabsContent>
             <TabsContent value="info">
               <dl className="grid grid-cols-1 gap-3 text-sm">
