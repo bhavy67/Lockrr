@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
+import { ServiceWorkerRegister } from "@/features/pwa/sw-register";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -53,6 +54,14 @@ export const metadata: Metadata = {
   },
   // Portfolio project — indexable so recruiters can find it.
   robots: { index: true, follow: true },
+
+  // PWA — iOS in particular needs these explicit tags because it doesn't
+  // read the Web App Manifest for install behavior.
+  appleWebApp: {
+    capable: true,
+    title: "LockKaro",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
@@ -74,6 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body className="min-h-svh bg-background font-sans antialiased">
         <Providers>{children}</Providers>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
