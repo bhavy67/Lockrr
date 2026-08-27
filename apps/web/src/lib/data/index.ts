@@ -16,6 +16,9 @@ import { supabaseClient } from "./supabase-client";
  */
 const mode = process.env.NEXT_PUBLIC_DATA_MODE ?? "mock";
 
-export const data: DataClient = mode === "supabase" ? supabaseClient : mockClient;
+/** Read by anything that needs to describe storage honestly in copy (see sign-up-form.tsx). */
+export const isSupabaseMode = mode === "supabase";
+
+export const data: DataClient = isSupabaseMode ? supabaseClient : mockClient;
 
 export type { DataClient } from "./client";

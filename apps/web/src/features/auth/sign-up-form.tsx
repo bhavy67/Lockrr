@@ -9,6 +9,7 @@ import { signUpSchema, type SignUpInput } from "@lockerr/validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isSupabaseMode } from "@/lib/data";
 import { useSignUp } from "./use-session";
 
 export function SignUpForm() {
@@ -91,8 +92,10 @@ export function SignUpForm() {
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        By continuing, you agree to keep your documents to yourself. This is a
-        demo build — accounts and files are stored locally on this device.
+        By continuing, you agree to keep your documents to yourself.{" "}
+        {isSupabaseMode
+          ? "Your account and files are stored securely and are visible only to you."
+          : "This is a demo build — accounts and files are stored locally on this device."}
       </p>
     </form>
   );

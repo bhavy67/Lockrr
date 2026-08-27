@@ -35,7 +35,7 @@ const capabilities = [
   {
     icon: ShieldCheck,
     title: "Private by design",
-    body: "Your vault, your device. Nothing is scraped, nothing is sold, nothing leaves the browser.",
+    body: "Your vault, your rules. Nothing is scraped, nothing is sold, nothing shared without you asking.",
   },
   {
     icon: Sparkles,
