@@ -11,7 +11,7 @@
 // Bump CACHE_VERSION when the service worker itself changes shape. The old
 // caches will be dropped in `activate`.
 
-const CACHE_VERSION = "lockkaro-v2";
+const CACHE_VERSION = "lockkaro-v3";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 

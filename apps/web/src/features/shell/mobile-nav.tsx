@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 import { Wordmark } from "@/components/brand/logo";
 import { useCommandPalette } from "@/features/command-palette/command-palette-store";
+import { InstallButton } from "@/features/pwa/install-button";
 import { cn } from "@/lib/utils";
 import { primaryNav } from "./nav-items";
 import { useUploadDialog } from "@/features/upload/upload-dialog-store";
@@ -18,6 +19,9 @@ export function MobileTopBar() {
         <Wordmark />
       </Link>
       <div className="flex items-center gap-1">
+        {/* Install button auto-hides when the app is already installed or on
+            unsupported browsers, so it's safe to render unconditionally. */}
+        <InstallButton />
         <button
           type="button"
           onClick={() => openPalette(true)}

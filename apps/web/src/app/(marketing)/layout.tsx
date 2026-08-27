@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Wordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { InstallButton } from "@/features/pwa/install-button";
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
@@ -12,6 +13,12 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             <Wordmark />
           </Link>
           <nav className="flex items-center gap-1 sm:gap-2">
+            {/* Only shows on mobile/tablet, and only when install is possible.
+                Renders nothing on desktop (browser has its own affordance)
+                or when the app is already installed. */}
+            <span className="lg:hidden">
+              <InstallButton />
+            </span>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/sign-in">Sign in</Link>
             </Button>
