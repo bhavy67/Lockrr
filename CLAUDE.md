@@ -285,6 +285,23 @@ button was already doing this right by swapping in short fallback text
 (`sm:hidden` → "Sort") instead of hiding it outright — prefer that pattern
 when there's room for even an abbreviated label.
 
+### 12. Every new table needs its own `grant` statement, in the same migration
+
+RLS policies decide which *rows* a role may touch. They say nothing about
+whether the role may touch the *table* at all — that's a separate privilege,
+and without it every query fails `permission denied for table ...` no matter
+how correct the policies are. `20260826000001_init.sql` grants
+`authenticated`/`service_role` explicitly, table by table, because hosted
+Supabase's own default privileges on `public` only cover tables created by
+`supabase_admin` (the dashboard's table editor) — migrations run as
+`postgres`, which gets none of that. This is easy to forget precisely because
+the *first* migration got it right: `document_texts`, added in Phase 7.1's
+`20260826000007_document_texts.sql`, shipped with RLS enabled and four
+policies but no grant, and would have failed every real request despite
+looking complete. Caught before it reached a real project — see the fix and
+its comment in that file for what a table needs. Check this every time a
+migration runs `create table`, not just the first time.
+
 ---
 
 ## Phase 6 — what shipped

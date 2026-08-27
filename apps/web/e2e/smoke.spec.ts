@@ -13,9 +13,7 @@ test.describe("Lockerr smoke", () => {
   test("signs up and reaches the dashboard", async ({ page }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("heading", {
-        name: /where is that important document/i,
-      }),
+      page.getByRole("heading", { name: /lock it\.\s*clock it\./i }),
     ).toBeVisible();
 
     await page.getByRole("link", { name: /create your vault/i }).first().click();
