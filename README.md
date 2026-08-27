@@ -5,6 +5,10 @@ Where is that important document? Right here, calmly organized and ready when yo
 
 Lockerr is a frontend-first portfolio project that stores, organizes, previews, and tracks the paperwork of your life — IDs, invoices, warranties, degrees, insurance, receipts. It is designed to feel like a real consumer product rather than a CRUD demo.
 
+**Live:** [lockkaro.vercel.app](https://lockkaro.vercel.app) — running against a real Supabase
+backend (Postgres, Auth, Storage), not the local mock. See
+[Running against Supabase](#running-against-supabase) for what that means.
+
 ---
 
 ## Status
