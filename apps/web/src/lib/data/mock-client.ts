@@ -11,21 +11,16 @@ import type {
   DocumentText,
   Reminder,
   Tag,
-  User,
 } from "@lockkaro/types";
 
 import { sanitizeFileName, sleep, stripExtension } from "@/lib/utils";
-import type {
-  AuthResult,
-  DataClient,
-  SaveDocumentTextInput,
-  UploadInput,
-} from "./client";
+import type { DataClient, SaveDocumentTextInput, UploadInput } from "./client";
 import { deleteFile, getFile, putFile } from "./mock-storage";
 
+// localStorage key prefix preserved intentionally — changing it would silently
+// erase existing data for anyone who has used the app before.
 const KEYS = {
-  session: "lockerr.session",
-  users: "lockerr.users",
+  deviceId: "lk.deviceId",
   categories: (uid: string) => `lockerr.categories.${uid}`,
   tags: (uid: string) => `lockerr.tags.${uid}`,
   collections: (uid: string) => `lockerr.collections.${uid}`,
@@ -33,8 +28,6 @@ const KEYS = {
   activity: (uid: string) => `lockerr.activity.${uid}`,
   documentTexts: (uid: string) => `lockerr.document_texts.${uid}`,
 } as const;
-
-type StoredUser = User & { passwordHash: string };
 
 // -------- storage helpers (SSR-safe: no-op on server) --------
 function ls(): Storage | null {
@@ -60,15 +53,6 @@ function uuid(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-// Not cryptographically secure — this is a demo mock only.
-async function hash(input: string): Promise<string> {
-  const enc = new TextEncoder().encode(input);
-  const buf = await crypto.subtle.digest("SHA-256", enc);
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 const DEFAULT_CATEGORIES: Array<
@@ -98,35 +82,34 @@ function seedCategoriesFor(userId: string): Category[] {
   }));
 }
 
-// -------- Auth ----
-async function getStoredUsers(): Promise<StoredUser[]> {
-  return read<StoredUser[]>(KEYS.users, []);
-}
-
-async function getCurrentSessionUserId(): Promise<string | null> {
+/**
+ * Returns the stable device ID, auto-generating one on first call.
+ * Also seeds default data the very first time a device accesses the vault.
+ */
+function getDeviceId(): string {
   const s = ls();
-  if (!s) return null;
-  return s.getItem(KEYS.session);
-}
+  if (!s) return "server";
 
-async function setSession(userId: string | null) {
-  const s = ls();
-  if (!s) return;
-  if (userId) s.setItem(KEYS.session, userId);
-  else s.removeItem(KEYS.session);
-}
-
-async function currentUserOrThrow(): Promise<User> {
-  const uid = await getCurrentSessionUserId();
-  if (!uid) throw new Error("Not signed in");
-  const users = await getStoredUsers();
-  const user = users.find((u) => u.id === uid);
-  if (!user) {
-    await setSession(null);
-    throw new Error("Session expired");
+  let id = s.getItem(KEYS.deviceId);
+  if (!id) {
+    id = uuid();
+    s.setItem(KEYS.deviceId, id);
+    // First-ever visit: seed default categories and empty collections.
+    write(KEYS.categories(id), seedCategoriesFor(id));
+    write(KEYS.tags(id), []);
+    write(KEYS.collections(id), []);
+    write(KEYS.documents(id), []);
+    write(KEYS.activity(id), []);
+  } else if (!s.getItem(KEYS.categories(id))) {
+    // Device ID exists but data was cleared — re-seed.
+    write(KEYS.categories(id), seedCategoriesFor(id));
+    write(KEYS.tags(id), []);
+    write(KEYS.collections(id), []);
+    write(KEYS.documents(id), []);
+    write(KEYS.activity(id), []);
   }
-  const { passwordHash: _ph, ...safe } = user;
-  return safe;
+
+  return id;
 }
 
 // -------- activity helper --------
@@ -220,75 +203,13 @@ function compareDocs(sort: DocumentSort | undefined) {
 }
 
 // ========================================================================
-// Mock DataClient
+// Mock DataClient — fully client-side, no auth required
 // ========================================================================
 class MockDataClient implements DataClient {
-  async getSession(): Promise<User | null> {
-    const uid = await getCurrentSessionUserId();
-    if (!uid) return null;
-    const users = await getStoredUsers();
-    const u = users.find((x) => x.id === uid);
-    if (!u) return null;
-    const { passwordHash: _ph, ...safe } = u;
-    return safe;
-  }
-
-  async signIn(email: string, password: string): Promise<AuthResult> {
-    await sleep(300);
-    const users = await getStoredUsers();
-    const passwordHash = await hash(password);
-    const user = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase(),
-    );
-    if (!user || user.passwordHash !== passwordHash) {
-      throw new Error("Incorrect email or password.");
-    }
-    await setSession(user.id);
-    const { passwordHash: _ph, ...safe } = user;
-    return { user: safe };
-  }
-
-  async signUp(
-    email: string,
-    password: string,
-    displayName: string,
-  ): Promise<AuthResult> {
-    await sleep(400);
-    const users = await getStoredUsers();
-    if (
-      users.some((u) => u.email.toLowerCase() === email.toLowerCase())
-    ) {
-      throw new Error("An account with this email already exists.");
-    }
-    const passwordHash = await hash(password);
-    const user: StoredUser = {
-      id: uuid(),
-      email,
-      displayName,
-      avatarUrl: null,
-      createdAt: new Date().toISOString(),
-      passwordHash,
-    };
-    users.push(user);
-    write(KEYS.users, users);
-    write(KEYS.categories(user.id), seedCategoriesFor(user.id));
-    write(KEYS.tags(user.id), []);
-    write(KEYS.collections(user.id), []);
-    write(KEYS.documents(user.id), []);
-    write(KEYS.activity(user.id), []);
-    await setSession(user.id);
-    const { passwordHash: _ph, ...safe } = user;
-    return { user: safe };
-  }
-
-  async signOut(): Promise<void> {
-    await setSession(null);
-  }
-
   // ---- Categories ----
   async listCategories(): Promise<Category[]> {
-    const user = await currentUserOrThrow();
-    return read<Category[]>(KEYS.categories(user.id), []).sort(
+    const uid = getDeviceId();
+    return read<Category[]>(KEYS.categories(uid), []).sort(
       (a, b) => a.sortOrder - b.sortOrder,
     );
   }
@@ -296,42 +217,42 @@ class MockDataClient implements DataClient {
   async createCategory(
     input: Omit<Category, "id" | "userId">,
   ): Promise<Category> {
-    const user = await currentUserOrThrow();
-    const cats = read<Category[]>(KEYS.categories(user.id), []);
-    const created: Category = { ...input, id: uuid(), userId: user.id };
+    const uid = getDeviceId();
+    const cats = read<Category[]>(KEYS.categories(uid), []);
+    const created: Category = { ...input, id: uuid(), userId: uid };
     cats.push(created);
-    write(KEYS.categories(user.id), cats);
+    write(KEYS.categories(uid), cats);
     return created;
   }
 
   // ---- Tags ----
   async listTags(): Promise<Tag[]> {
-    const user = await currentUserOrThrow();
-    return read<Tag[]>(KEYS.tags(user.id), []);
+    const uid = getDeviceId();
+    return read<Tag[]>(KEYS.tags(uid), []);
   }
 
   async createTag(input: Omit<Tag, "id" | "userId">): Promise<Tag> {
-    const user = await currentUserOrThrow();
-    const tags = read<Tag[]>(KEYS.tags(user.id), []);
+    const uid = getDeviceId();
+    const tags = read<Tag[]>(KEYS.tags(uid), []);
     const existing = tags.find(
       (t) => t.name.toLowerCase() === input.name.toLowerCase(),
     );
     if (existing) return existing;
-    const created: Tag = { ...input, id: uuid(), userId: user.id };
+    const created: Tag = { ...input, id: uuid(), userId: uid };
     tags.push(created);
-    write(KEYS.tags(user.id), tags);
-    logActivity(user.id, "tag.created", null, { name: created.name });
+    write(KEYS.tags(uid), tags);
+    logActivity(uid, "tag.created", null, { name: created.name });
     return created;
   }
 
   async deleteTag(id: string): Promise<void> {
-    const user = await currentUserOrThrow();
-    const tags = read<Tag[]>(KEYS.tags(user.id), []);
+    const uid = getDeviceId();
+    const tags = read<Tag[]>(KEYS.tags(uid), []);
     write(
-      KEYS.tags(user.id),
+      KEYS.tags(uid),
       tags.filter((t) => t.id !== id),
     );
-    const docs = read<DocumentRecord[]>(KEYS.documents(user.id), []);
+    const docs = read<DocumentRecord[]>(KEYS.documents(uid), []);
     let touched = false;
     for (const d of docs) {
       if (d.tagIds.includes(id)) {
@@ -339,37 +260,37 @@ class MockDataClient implements DataClient {
         touched = true;
       }
     }
-    if (touched) write(KEYS.documents(user.id), docs);
+    if (touched) write(KEYS.documents(uid), docs);
   }
 
   // ---- Collections ----
   async listCollections(): Promise<Collection[]> {
-    const user = await currentUserOrThrow();
-    return read<Collection[]>(KEYS.collections(user.id), []).sort((a, b) =>
+    const uid = getDeviceId();
+    return read<Collection[]>(KEYS.collections(uid), []).sort((a, b) =>
       a.name.localeCompare(b.name),
     );
   }
 
   async getCollection(id: string): Promise<Collection | null> {
-    const user = await currentUserOrThrow();
-    const list = read<Collection[]>(KEYS.collections(user.id), []);
+    const uid = getDeviceId();
+    const list = read<Collection[]>(KEYS.collections(uid), []);
     return list.find((c) => c.id === id) ?? null;
   }
 
   async createCollection(
     input: Omit<Collection, "id" | "userId" | "createdAt">,
   ): Promise<Collection> {
-    const user = await currentUserOrThrow();
-    const list = read<Collection[]>(KEYS.collections(user.id), []);
+    const uid = getDeviceId();
+    const list = read<Collection[]>(KEYS.collections(uid), []);
     const created: Collection = {
       ...input,
       id: uuid(),
-      userId: user.id,
+      userId: uid,
       createdAt: new Date().toISOString(),
     };
     list.push(created);
-    write(KEYS.collections(user.id), list);
-    logActivity(user.id, "collection.created", null, { name: created.name });
+    write(KEYS.collections(uid), list);
+    logActivity(uid, "collection.created", null, { name: created.name });
     return created;
   }
 
@@ -377,24 +298,24 @@ class MockDataClient implements DataClient {
     id: string,
     patch: Partial<Omit<Collection, "id" | "userId" | "createdAt">>,
   ): Promise<Collection> {
-    const user = await currentUserOrThrow();
-    const list = read<Collection[]>(KEYS.collections(user.id), []);
+    const uid = getDeviceId();
+    const list = read<Collection[]>(KEYS.collections(uid), []);
     const idx = list.findIndex((c) => c.id === id);
     if (idx === -1) throw new Error("Collection not found");
     const next: Collection = { ...list[idx]!, ...patch };
     list[idx] = next;
-    write(KEYS.collections(user.id), list);
+    write(KEYS.collections(uid), list);
     return next;
   }
 
   async deleteCollection(id: string): Promise<void> {
-    const user = await currentUserOrThrow();
-    const list = read<Collection[]>(KEYS.collections(user.id), []);
+    const uid = getDeviceId();
+    const list = read<Collection[]>(KEYS.collections(uid), []);
     write(
-      KEYS.collections(user.id),
+      KEYS.collections(uid),
       list.filter((c) => c.id !== id),
     );
-    const docs = read<DocumentRecord[]>(KEYS.documents(user.id), []);
+    const docs = read<DocumentRecord[]>(KEYS.documents(uid), []);
     let touched = false;
     for (const d of docs) {
       if (d.collectionIds.includes(id)) {
@@ -402,44 +323,41 @@ class MockDataClient implements DataClient {
         touched = true;
       }
     }
-    if (touched) write(KEYS.documents(user.id), docs);
+    if (touched) write(KEYS.documents(uid), docs);
   }
 
   // ---- Documents ----
-  async listDocuments(
-    filters?: DocumentFilters,
-  ): Promise<DocumentRecord[]> {
-    const user = await currentUserOrThrow();
-    const docs = read<DocumentRecord[]>(KEYS.documents(user.id), []);
+  async listDocuments(filters?: DocumentFilters): Promise<DocumentRecord[]> {
+    const uid = getDeviceId();
+    const docs = read<DocumentRecord[]>(KEYS.documents(uid), []);
     return docs
       .filter((d) => matchesFilters(d, filters))
       .sort(compareDocs(filters?.sort));
   }
 
   async getDocument(id: string): Promise<DocumentRecord | null> {
-    const user = await currentUserOrThrow();
-    const docs = read<DocumentRecord[]>(KEYS.documents(user.id), []);
+    const uid = getDeviceId();
+    const docs = read<DocumentRecord[]>(KEYS.documents(uid), []);
     return docs.find((d) => d.id === id) ?? null;
   }
 
   async uploadDocument(input: UploadInput): Promise<DocumentRecord> {
-    const user = await currentUserOrThrow();
+    const uid = getDeviceId();
 
     const total = input.file.size;
-    // Simulated progress: chunk into ~10 ticks
     if (input.onProgress) {
       for (let i = 1; i <= 10; i++) {
         await sleep(60 + Math.random() * 40);
         input.onProgress(Math.round((i / 10) * 90));
       }
     }
-    const storagePath = `${user.id}/${uuid()}-${sanitizeFileName(input.file.name)}`;
+    const storagePath = `${uid}/${uuid()}-${sanitizeFileName(input.file.name)}`;
     await putFile(storagePath, input.file);
 
     const now = new Date().toISOString();
     const record: DocumentRecord = {
       id: uuid(),
-      userId: user.id,
+      userId: uid,
       categoryId: input.categoryId ?? null,
       title: input.title ?? stripExtension(input.file.name),
       description: input.description ?? null,
@@ -459,14 +377,12 @@ class MockDataClient implements DataClient {
       updatedAt: now,
     };
 
-    const docs = read<DocumentRecord[]>(KEYS.documents(user.id), []);
+    const docs = read<DocumentRecord[]>(KEYS.documents(uid), []);
     docs.push(record);
-    write(KEYS.documents(user.id), docs);
+    write(KEYS.documents(uid), docs);
 
     if (input.onProgress) input.onProgress(100);
-    logActivity(user.id, "document.uploaded", record.id, {
-      title: record.title,
-    });
+    logActivity(uid, "document.uploaded", record.id, { title: record.title });
     return record;
   }
 
@@ -474,8 +390,8 @@ class MockDataClient implements DataClient {
     id: string,
     patch: Partial<DocumentRecord>,
   ): Promise<DocumentRecord> {
-    const user = await currentUserOrThrow();
-    const docs = read<DocumentRecord[]>(KEYS.documents(user.id), []);
+    const uid = getDeviceId();
+    const docs = read<DocumentRecord[]>(KEYS.documents(uid), []);
     const idx = docs.findIndex((d) => d.id === id);
     if (idx === -1) throw new Error("Document not found");
     const prev = docs[idx]!;
@@ -488,11 +404,11 @@ class MockDataClient implements DataClient {
       updatedAt: new Date().toISOString(),
     };
     docs[idx] = next;
-    write(KEYS.documents(user.id), docs);
+    write(KEYS.documents(uid), docs);
 
     if (patch.isFavorite !== undefined && patch.isFavorite !== prev.isFavorite) {
       logActivity(
-        user.id,
+        uid,
         patch.isFavorite ? "document.favorited" : "document.unfavorited",
         id,
         { title: next.title },
@@ -502,36 +418,36 @@ class MockDataClient implements DataClient {
       patch.isArchived !== prev.isArchived
     ) {
       logActivity(
-        user.id,
+        uid,
         patch.isArchived ? "document.archived" : "document.restored",
         id,
         { title: next.title },
       );
     } else {
-      logActivity(user.id, "document.updated", id, { title: next.title });
+      logActivity(uid, "document.updated", id, { title: next.title });
     }
     return next;
   }
 
   async deleteDocument(id: string): Promise<void> {
-    const user = await currentUserOrThrow();
-    const docs = read<DocumentRecord[]>(KEYS.documents(user.id), []);
+    const uid = getDeviceId();
+    const docs = read<DocumentRecord[]>(KEYS.documents(uid), []);
     const doc = docs.find((d) => d.id === id);
     if (!doc) return;
     await deleteFile(doc.storagePath);
     write(
-      KEYS.documents(user.id),
+      KEYS.documents(uid),
       docs.filter((d) => d.id !== id),
     );
     const texts = read<Record<string, DocumentText>>(
-      KEYS.documentTexts(user.id),
+      KEYS.documentTexts(uid),
       {},
     );
     if (texts[id]) {
       delete texts[id];
-      write(KEYS.documentTexts(user.id), texts);
+      write(KEYS.documentTexts(uid), texts);
     }
-    logActivity(user.id, "document.deleted", id, { title: doc.title });
+    logActivity(uid, "document.deleted", id, { title: doc.title });
   }
 
   async getDocumentUrl(id: string): Promise<string> {
@@ -552,8 +468,8 @@ class MockDataClient implements DataClient {
   }
 
   async listActivity(limit = 50): Promise<ActivityEvent[]> {
-    const user = await currentUserOrThrow();
-    return read<ActivityEvent[]>(KEYS.activity(user.id), []).slice(0, limit);
+    const uid = getDeviceId();
+    return read<ActivityEvent[]>(KEYS.activity(uid), []).slice(0, limit);
   }
 
   async listReminders(): Promise<Reminder[]> {
@@ -563,9 +479,9 @@ class MockDataClient implements DataClient {
   // ---- Extraction (Phase 7.1) ----
 
   async getDocumentText(documentId: string): Promise<DocumentText | null> {
-    const user = await currentUserOrThrow();
+    const uid = getDeviceId();
     const map = read<Record<string, DocumentText>>(
-      KEYS.documentTexts(user.id),
+      KEYS.documentTexts(uid),
       {},
     );
     return map[documentId] ?? null;
@@ -574,9 +490,9 @@ class MockDataClient implements DataClient {
   async saveDocumentText(
     input: SaveDocumentTextInput,
   ): Promise<DocumentText> {
-    const user = await currentUserOrThrow();
+    const uid = getDeviceId();
     const map = read<Record<string, DocumentText>>(
-      KEYS.documentTexts(user.id),
+      KEYS.documentTexts(uid),
       {},
     );
     const now = new Date().toISOString();
@@ -593,7 +509,7 @@ class MockDataClient implements DataClient {
       extractedAt: isFinal ? now : (map[input.documentId]?.extractedAt ?? null),
     };
     map[input.documentId] = record;
-    write(KEYS.documentTexts(user.id), map);
+    write(KEYS.documentTexts(uid), map);
     return record;
   }
 }

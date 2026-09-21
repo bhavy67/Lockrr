@@ -9,7 +9,7 @@ import {
   Grid2X2,
   LayoutDashboard,
   Library,
-  LogOut,
+  Settings,
   Star,
   UploadCloud,
 } from "lucide-react";
@@ -25,7 +25,6 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { useSignOut } from "@/features/auth/use-session";
 import { useCollections } from "@/features/collections/hooks";
 import { documentKind } from "@/features/documents/document-icon";
 import { useDocuments } from "@/features/documents/hooks";
@@ -38,7 +37,6 @@ export function CommandPalette() {
   const setOpen = useCommandPalette((s) => s.setOpen);
   const router = useRouter();
   const openUpload = useUploadDialog((s) => s.open);
-  const signOut = useSignOut();
 
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounced(query, 100);
@@ -115,6 +113,13 @@ export function CommandPalette() {
                 {expiringCount}
               </span>
             )}
+          </CommandItem>
+          <CommandItem
+            value="settings backup"
+            onSelect={() => run(() => router.push("/settings"))}
+          >
+            <Settings />
+            Settings
           </CommandItem>
         </CommandGroup>
 
@@ -222,23 +227,6 @@ export function CommandPalette() {
             </CommandGroup>
           </>
         )}
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Account">
-          <CommandItem
-            value="lock vault sign out"
-            onSelect={() =>
-              run(async () => {
-                await signOut.mutateAsync();
-                router.replace("/");
-              })
-            }
-          >
-            <LogOut />
-            Lock vault (sign out)
-          </CommandItem>
-        </CommandGroup>
       </CommandList>
     </CommandDialog>
   );

@@ -5,6 +5,7 @@ import {
   Grid2X2,
   LayoutDashboard,
   Library,
+  Settings,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -54,3 +55,10 @@ export const primaryNav: NavItem[] = [
     match: (p) => p.startsWith("/reminders"),
   },
 ];
+
+export const settingsNav: NavItem = {
+  href: "/settings",
+  label: "Settings",
+  icon: Settings,
+  match: (p) => p.startsWith("/settings"),
+};

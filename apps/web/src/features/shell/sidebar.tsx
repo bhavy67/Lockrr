@@ -9,9 +9,9 @@ import { PaletteTrigger } from "@/features/command-palette/palette-trigger";
 import { useDocuments } from "@/features/documents/hooks";
 import { attentionCount } from "@/features/documents/expiry";
 import { cn } from "@/lib/utils";
-import { primaryNav } from "./nav-items";
-import { UserMenu } from "./user-menu";
+import { primaryNav, settingsNav } from "./nav-items";
 import { useUploadDialog } from "@/features/upload/upload-dialog-store";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -81,8 +81,27 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-border/60 p-3">
-        <UserMenu />
+      <div className="space-y-1 border-t border-border/60 p-3">
+        {/* Settings */}
+        <Link
+          href={settingsNav.href}
+          className={cn(
+            "focus-ring flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground transition-colors",
+            settingsNav.match?.(pathname)
+              ? "bg-primary/10 text-foreground"
+              : "hover:bg-accent hover:text-foreground",
+          )}
+          aria-current={settingsNav.match?.(pathname) ? "page" : undefined}
+        >
+          <settingsNav.icon
+            className={cn(
+              "h-4 w-4",
+              settingsNav.match?.(pathname) ? "text-primary" : "text-muted-foreground",
+            )}
+          />
+          <span className="flex-1">{settingsNav.label}</span>
+        </Link>
+        <ThemeToggle />
       </div>
     </aside>
   );

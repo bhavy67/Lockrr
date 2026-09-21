@@ -4,31 +4,31 @@
 
 @layer base {
   :root {
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
-    /* Light — calm neutral (zinc) + indigo accent */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 4%;
+    /* Light — warm stone + amber */
+    --background: 36 33% 97%;
+    --foreground: 20 14% 10%;
 
-    --surface: 240 5% 98%;
+    --surface: 36 25% 95%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
+    --card-foreground: 20 14% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 4%;
+    --popover-foreground: 20 14% 10%;
 
-    --primary: 239 84% 60%; /* indigo-600 */
-    --primary-foreground: 0 0% 100%;
+    --primary: 38 92% 50%; /* amber-500 */
+    --primary-foreground: 20 14% 8%;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
+    --secondary: 36 20% 93%;
+    --secondary-foreground: 20 14% 18%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 36 20% 93%;
+    --muted-foreground: 25 10% 48%;
 
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 6% 10%;
+    --accent: 38 80% 94%;
+    --accent-foreground: 20 14% 14%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -39,47 +39,47 @@
     --success: 152 61% 41%;
     --success-foreground: 0 0% 100%;
 
-    --border: 240 5% 90%;
-    --input: 240 5% 90%;
-    --ring: 239 84% 60%;
+    --border: 25 12% 87%;
+    --input: 25 12% 87%;
+    --ring: 38 92% 50%;
   }
 
   .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
+    --background: 20 14% 9%;
+    --foreground: 36 25% 96%;
 
-    --surface: 240 6% 7%;
+    --surface: 20 12% 12%;
 
-    --card: 240 8% 6%;
-    --card-foreground: 0 0% 98%;
+    --card: 20 12% 11%;
+    --card-foreground: 36 25% 96%;
 
-    --popover: 240 8% 6%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 20 12% 11%;
+    --popover-foreground: 36 25% 96%;
 
-    --primary: 234 89% 74%; /* indigo-400 for dark */
-    --primary-foreground: 240 10% 4%;
+    --primary: 38 92% 60%; /* brighter amber for dark */
+    --primary-foreground: 20 14% 8%;
 
-    --secondary: 240 5% 12%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 20 10% 18%;
+    --secondary-foreground: 36 20% 90%;
 
-    --muted: 240 5% 12%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 20 10% 16%;
+    --muted-foreground: 25 8% 54%;
 
-    --accent: 240 5% 14%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 38 30% 18%;
+    --accent-foreground: 36 25% 92%;
 
     --destructive: 0 62% 55%;
     --destructive-foreground: 0 0% 98%;
 
     --warning: 35 92% 60%;
-    --warning-foreground: 240 10% 4%;
+    --warning-foreground: 20 14% 8%;
 
     --success: 152 55% 52%;
-    --success-foreground: 240 10% 4%;
+    --success-foreground: 20 14% 8%;
 
-    --border: 240 5% 16%;
-    --input: 240 5% 16%;
-    --ring: 234 89% 74%;
+    --border: 25 8% 20%;
+    --input: 25 8% 20%;
+    --ring: 38 92% 60%;
   }
 
   * {

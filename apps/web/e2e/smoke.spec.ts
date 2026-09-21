@@ -2,44 +2,32 @@ import { expect, test } from "@playwright/test";
 
 /**
  * Minimum-viable smoke test. Proves that:
- *  1. The landing renders
- *  2. Sign-up creates a local account and lands on the dashboard
+ *  1. The welcome screen renders on first visit
+ *  2. "Open my vault" lands on the vault page
  *  3. The upload dialog opens via the `U` shortcut and closes with Escape
  *
  * The mock data layer persists to localStorage / IndexedDB inside the browser
  * context, which Playwright isolates per test, so no cleanup is needed.
  */
 test.describe("LockKaro smoke", () => {
-  test("signs up and reaches the dashboard", async ({ page }) => {
+  test("welcome screen renders and opens vault", async ({ page }) => {
     await page.goto("/");
+
     await expect(
-      page.getByRole("heading", { name: /lock it\.\s*clock it\./i }),
+      page.getByRole("heading", { name: /personal.*vault/i }),
     ).toBeVisible();
 
-    await page.getByRole("link", { name: /create your vault/i }).first().click();
+    await page.getByRole("button", { name: /open my vault/i }).click();
 
-    const email = `test-${Date.now()}@example.com`;
-    await page.getByLabel("What should we call you?").fill("Test User");
-    await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Password").fill("password123");
-    await page.getByRole("button", { name: /create your vault/i }).click();
-
-    // waitForURL, not toHaveURL: the dev server compiles /dashboard on this
-    // first navigation, which can outlast the 5s expect timeout.
-    await page.waitForURL(/\/dashboard/);
-    await expect(
-      page.getByRole("heading", { name: /test user/i }),
-    ).toBeVisible();
+    await page.waitForURL(/\/vault/);
+    await expect(page).toHaveURL(/\/vault/);
   });
 
   test("keyboard shortcut opens the upload dialog", async ({ page }) => {
-    await page.goto("/sign-up");
-    const email = `test-${Date.now()}@example.com`;
-    await page.getByLabel("What should we call you?").fill("Test User");
-    await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Password").fill("password123");
-    await page.getByRole("button", { name: /create your vault/i }).click();
-    await page.waitForURL(/\/dashboard/);
+    // Skip welcome by setting onboarded flag
+    await page.goto("/");
+    await page.evaluate(() => localStorage.setItem("lk.onboarded", "true"));
+    await page.goto("/vault");
 
     await page.keyboard.press("u");
     await expect(

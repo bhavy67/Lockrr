@@ -9,12 +9,7 @@ import type {
   ExtractionStatus,
   Reminder,
   Tag,
-  User,
 } from "@lockkaro/types";
-
-export interface AuthResult {
-  user: User;
-}
 
 export interface UploadInput {
   file: File;
@@ -28,16 +23,6 @@ export interface UploadInput {
 }
 
 export interface DataClient {
-  // ---- Auth ----
-  getSession(): Promise<User | null>;
-  signIn(email: string, password: string): Promise<AuthResult>;
-  signUp(
-    email: string,
-    password: string,
-    displayName: string,
-  ): Promise<AuthResult>;
-  signOut(): Promise<void>;
-
   // ---- Categories ----
   listCategories(): Promise<Category[]>;
   createCategory(input: Omit<Category, "id" | "userId">): Promise<Category>;

@@ -45,3 +45,22 @@ export async function getFile(key: string): Promise<Blob | null> {
 export async function deleteFile(key: string): Promise<void> {
   await withStore("readwrite", (s) => s.delete(key));
 }
+
+/** Returns all stored files as a Map<storagePath, Blob>. Used by backup. */
+export async function getAllFiles(): Promise<Map<string, Blob>> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readonly");
+    const store = tx.objectStore(STORE);
+    const result = new Map<string, Blob>();
+    const keysReq = store.getAllKeys();
+    const valsReq = store.getAll();
+    tx.oncomplete = () => {
+      const keys = keysReq.result as string[];
+      const vals = valsReq.result as Blob[];
+      keys.forEach((k, i) => result.set(k, vals[i]!));
+      resolve(result);
+    };
+    tx.onerror = () => reject(tx.error);
+  });
+}

@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { useSignOut } from "@/features/auth/use-session";
 import { useUploadDialog } from "@/features/upload/upload-dialog-store";
 import { useCommandPalette } from "./command-palette-store";
 
@@ -21,14 +20,13 @@ function isTypingTarget(el: EventTarget | null): boolean {
  * - ⌘K / Ctrl+K: open command palette
  * - U: open upload dialog
  * - /: focus vault search
- * - G then D/V/C/L/R: navigate
+ * - G then D/V/C/L/R/T: navigate
  * Shortcuts other than ⌘K are ignored while typing in an input.
  */
 export function useKeyboardShortcuts() {
   const router = useRouter();
   const togglePalette = useCommandPalette((s) => s.toggle);
   const openUpload = useUploadDialog((s) => s.open);
-  const signOut = useSignOut();
   const goModeRef = useRef<{ armed: boolean; timer: number | null }>({
     armed: false,
     timer: null,
@@ -115,16 +113,10 @@ export function useKeyboardShortcuts() {
           e.preventDefault();
           togglePalette();
           return;
-        case "q":
-          if (e.shiftKey) {
-            e.preventDefault();
-            void signOut.mutateAsync().then(() => router.replace("/"));
-          }
-          return;
       }
     };
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [router, togglePalette, openUpload, signOut]);
+  }, [router, togglePalette, openUpload]);
 }

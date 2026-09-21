@@ -1,14 +1,6 @@
 export type UUID = string;
 export type ISODate = string;
 
-export interface User {
-  id: UUID;
-  email: string;
-  displayName: string;
-  avatarUrl?: string | null;
-  createdAt: ISODate;
-}
-
 export type CategorySlug =
   | "identity"
   | "property"

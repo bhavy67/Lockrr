@@ -15,7 +15,6 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSession } from "@/features/auth/use-session";
 import { useUploadDialog } from "@/features/upload/upload-dialog-store";
 import { DocumentRow } from "@/features/documents/document-row";
 import { ExpiryBadge } from "@/features/documents/expiry-badge";
@@ -30,7 +29,6 @@ import { CategoryBreakdown } from "./category-breakdown";
 import { StatCard } from "./stat-card";
 
 export function DashboardView() {
-  const { data: user } = useSession();
   const { data: allDocs, isLoading } = useDocuments();
   const { data: categories = [] } = useCategories();
   const { data: activity } = useActivity(8);
@@ -99,7 +97,7 @@ export function DashboardView() {
         <div>
           <p className="text-sm text-muted-foreground">{greeting},</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            {user?.displayName ?? "Welcome"}.
+            Your vault.
           </h1>
         </div>
         <Button onClick={() => openUpload()}>

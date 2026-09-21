@@ -1,11 +1,10 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Menu, Monitor, Moon, Sun } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, Monitor, Moon, Settings, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -15,18 +14,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useSession, useSignOut } from "@/features/auth/use-session";
 import { useDocuments } from "@/features/documents/hooks";
 import { attentionCount } from "@/features/documents/expiry";
-import { cn, initials } from "@/lib/utils";
-import { primaryNav } from "./nav-items";
+import { cn } from "@/lib/utils";
+import { primaryNav, settingsNav } from "./nav-items";
 
 export function MobileMenuSheet() {
   const [open, setOpen] = useState(false);
-  const { data: user } = useSession();
   const { theme, setTheme } = useTheme();
-  const signOut = useSignOut();
-  const router = useRouter();
   const pathname = usePathname();
   const { data: docs = [] } = useDocuments({ archived: false });
   const attention = attentionCount(docs);
@@ -49,23 +44,7 @@ export function MobileMenuSheet() {
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
 
-        {user && (
-          <div className="mx-6 flex items-center gap-3 rounded-md border border-border bg-surface p-3">
-            <Avatar className="h-10 w-10">
-              <AvatarFallback>{initials(user.displayName)}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <div className="truncate text-sm font-medium">
-                {user.displayName}
-              </div>
-              <div className="truncate text-xs text-muted-foreground">
-                {user.email}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <nav className="mt-6 space-y-0.5 px-3">
+        <nav className="mt-2 space-y-0.5 px-3">
           {primaryNav.map((item) => {
             const active = item.match
               ? item.match(pathname)
@@ -100,9 +79,28 @@ export function MobileMenuSheet() {
           })}
         </nav>
 
-        <Separator className="my-4" />
+        <Separator className="my-2" />
 
-        <div className="px-6">
+        <div className="px-3">
+          <Link
+            href={settingsNav.href}
+            onClick={() => setOpen(false)}
+            aria-current={settingsNav.match?.(pathname) ? "page" : undefined}
+            className={cn(
+              "focus-ring flex items-center gap-3 rounded-md px-3 py-2.5 text-sm",
+              settingsNav.match?.(pathname)
+                ? "bg-primary/10 text-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            )}
+          >
+            <Settings className="h-4 w-4" />
+            <span>Settings</span>
+          </Link>
+        </div>
+
+        <Separator className="my-2" />
+
+        <div className="px-6 pb-4">
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Appearance
           </p>
@@ -124,22 +122,6 @@ export function MobileMenuSheet() {
               </button>
             ))}
           </div>
-        </div>
-
-        <Separator className="mt-auto" />
-        <div className="p-6">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={async () => {
-              await signOut.mutateAsync();
-              setOpen(false);
-              router.replace("/");
-            }}
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </Button>
         </div>
       </SheetContent>
     </Sheet>

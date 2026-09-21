@@ -10,30 +10,6 @@ export const ACCEPTED_MIME_TYPES = [
 
 export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB per file
 
-export const signUpSchema = z
-  .object({
-    email: z.string().email("Enter a valid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(128, "Password is too long"),
-    displayName: z
-      .string()
-      .min(1, "What should we call you?")
-      .max(60, "Name is too long"),
-  })
-  .strict();
-
-export const signInSchema = z
-  .object({
-    email: z.string().email("Enter a valid email address"),
-    password: z.string().min(1, "Enter your password"),
-  })
-  .strict();
-
-export type SignUpInput = z.infer<typeof signUpSchema>;
-export type SignInInput = z.infer<typeof signInSchema>;
-
 export const documentUpdateSchema = z
   .object({
     title: z.string().min(1).max(200).optional(),
