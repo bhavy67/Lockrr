@@ -26,7 +26,7 @@ export function DocumentRow({ document: doc, category, tags }: Props) {
         "hover:border-border hover:bg-surface",
       )}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/80">
         <DocumentIcon mimeType={doc.mimeType} className="h-5 w-5" />
       </div>
 

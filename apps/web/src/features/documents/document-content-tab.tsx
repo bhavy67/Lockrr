@@ -39,8 +39,7 @@ export function DocumentContentTab({ document: doc }: Props) {
     setFetchingBlob(true);
     try {
       // Existing documents don't have the original File in memory — pull it
-      // from the storage URL. In the mock this is a blob URL from IndexedDB;
-      // in Supabase it's a short-lived signed URL.
+      // from the blob URL stored in IndexedDB.
       const url = await data.getDocumentUrl(doc.id);
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Fetch failed (${res.status})`);

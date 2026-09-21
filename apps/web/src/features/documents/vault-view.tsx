@@ -30,7 +30,7 @@ interface VaultViewProps {
 export function VaultView({
   initialFilters,
   emptyTitle = "Your vault is empty.",
-  emptyDescription = "Upload your first important document.",
+  emptyDescription = "Drop in your first document to get started.",
   hideControls,
 }: VaultViewProps) {
   const [view, setView] = useState<DocumentView>("grid");
@@ -190,7 +190,7 @@ export function VaultView({
       ) : view === "grid" ? (
         <DocumentGrid documents={documents} categoryMap={categoryMap} />
       ) : (
-        <div className="space-y-1 rounded-lg border border-border bg-card p-1">
+        <div className="space-y-0.5 rounded-xl border border-border bg-card p-1.5 shadow-subtle">
           {documents.map((d) => (
             <DocumentRow
               key={d.id}
@@ -224,7 +224,7 @@ function VaultSkeleton({ view }: { view: DocumentView }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
       {Array.from({ length: 10 }).map((_, i) => (
-        <div key={i} className="overflow-hidden rounded-lg border border-border">
+        <div key={i} className="overflow-hidden rounded-xl border border-border">
           <Skeleton className="aspect-[4/5] w-full" />
           <div className="space-y-1.5 p-3">
             <Skeleton className="h-3.5 w-2/3" />

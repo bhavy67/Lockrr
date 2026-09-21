@@ -16,8 +16,8 @@ export function DocumentIcon({
 }) {
   const kind = documentKind(mimeType);
   if (kind === "image")
-    return <FileImage className={cn("text-sky-500", className)} />;
+    return <FileImage className={cn("text-amber-500", className)} />;
   if (kind === "pdf")
-    return <FileText className={cn("text-rose-500", className)} />;
+    return <FileText className={cn("text-orange-600 dark:text-orange-400", className)} />;
   return <FileIcon className={cn("text-muted-foreground", className)} />;
 }

@@ -185,10 +185,10 @@ export function CommandPalette() {
                     <FileText
                       className={
                         kind === "image"
-                          ? "text-sky-500"
+                          ? "text-amber-500"
                           : kind === "pdf"
-                            ? "text-rose-500"
-                            : ""
+                            ? "text-orange-500"
+                            : "text-muted-foreground"
                       }
                     />
                     <div className="min-w-0 flex-1">

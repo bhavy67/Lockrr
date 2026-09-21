@@ -252,17 +252,27 @@ export function UploadDialog() {
           <div
             {...getRootProps()}
             className={cn(
-              "flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-surface/50 px-6 py-12 text-center transition-colors",
-              isDragActive && "border-primary/60 bg-primary/5",
+              "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface/40 px-6 py-12 text-center transition-colors duration-150",
+              isDragActive
+                ? "border-primary bg-primary/8 scale-[1.01]"
+                : "hover:border-primary/50 hover:bg-muted/40",
             )}
           >
             <input {...getInputProps()} aria-label="Choose files to upload" />
-            <UploadCloud className="mb-3 h-8 w-8 text-muted-foreground" />
+            <div className={cn(
+              "mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
+              isDragActive ? "bg-primary/15" : "bg-muted",
+            )}>
+              <UploadCloud className={cn(
+                "h-6 w-6 transition-colors",
+                isDragActive ? "text-primary" : "text-muted-foreground",
+              )} />
+            </div>
             <p className="text-sm font-medium text-foreground">
-              {isDragActive ? "Drop to add" : "Drop files or click to browse"}
+              {isDragActive ? "Release to add" : "Drop files or click to browse"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Multiple files supported.
+              PDF, JPG, PNG, WebP — up to {formatBytes(MAX_FILE_SIZE_BYTES)} each
             </p>
           </div>
         ) : (
@@ -388,7 +398,7 @@ export function UploadDialog() {
             {/* Add more */}
             <div
               {...getRootProps()}
-              className="flex cursor-pointer items-center justify-center rounded-md border border-dashed border-border py-3 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-3 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
             >
               <input {...getInputProps()} aria-label="Add more files" />
               + Add more files
@@ -438,8 +448,8 @@ function QueueRow({
   const Icon = isImage ? ImageIcon : FileText;
   return (
     <div className="flex items-center gap-3 rounded-md border border-border bg-card p-2.5">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-        <Icon className="h-4 w-4" />
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted/80">
+        <Icon className={cn("h-4 w-4", isImage ? "text-amber-500" : "text-orange-500 dark:text-orange-400")} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

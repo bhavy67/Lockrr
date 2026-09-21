@@ -54,14 +54,18 @@ export function DocumentThumbnail({ document, className }: Props) {
     );
   }
 
+  const isPdf = kind === "pdf";
   return (
     <div
       className={cn(
-        "flex h-full w-full items-center justify-center bg-gradient-to-br from-surface to-muted",
+        "flex h-full w-full items-center justify-center",
+        isPdf
+          ? "bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/40 dark:to-amber-950/30"
+          : "bg-gradient-to-br from-muted/60 to-muted",
         className,
       )}
     >
-      <DocumentIcon mimeType={document.mimeType} className="h-10 w-10" />
+      <DocumentIcon mimeType={document.mimeType} className="h-10 w-10 opacity-80" />
     </div>
   );
 }

@@ -21,8 +21,8 @@ export function DocumentCard({ document: doc, category }: Props) {
     <Link
       href={`/vault/${doc.id}`}
       className={cn(
-        "focus-ring group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all",
-        "hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated",
+        "focus-ring group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200",
+        "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-elevated",
       )}
     >
       <div className="relative aspect-[4/5] w-full overflow-hidden">
@@ -57,7 +57,7 @@ export function DocumentCard({ document: doc, category }: Props) {
         )}
       </div>
 
-      <div className="flex items-start justify-between gap-2 p-3">
+      <div className="flex items-start justify-between gap-2 p-3 pt-2.5">
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-medium text-foreground">
             {doc.title}

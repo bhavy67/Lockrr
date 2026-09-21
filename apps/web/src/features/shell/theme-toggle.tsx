@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const themes = [
@@ -12,6 +13,9 @@ const themes = [
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <div className="flex items-center gap-1 rounded-md bg-muted/60 p-1">
       {themes.map(({ id, Icon, label }) => (
@@ -22,7 +26,7 @@ export function ThemeToggle() {
           onClick={() => setTheme(id)}
           className={cn(
             "focus-ring flex flex-1 items-center justify-center rounded py-1 text-xs transition-colors",
-            theme === id
+            mounted && theme === id
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground",
           )}
