@@ -17,7 +17,7 @@ test.describe("LockKaro smoke", () => {
       page.getByRole("heading", { name: /personal.*vault/i }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: /open my vault/i }).click();
+    await page.getByRole("button", { name: /open my vault/i }).first().click();
 
     await page.waitForURL(/\/vault/);
     await expect(page).toHaveURL(/\/vault/);
