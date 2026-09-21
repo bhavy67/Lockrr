@@ -15,6 +15,8 @@ import { useCategories, useDocuments } from "./hooks";
 import { DocumentGrid } from "./document-grid";
 import { DocumentRow } from "./document-row";
 import {
+  ActiveFilterBar,
+  CategoryStrip,
   VaultFilters,
   VaultSortDropdown,
   type FilterState,
@@ -86,83 +88,109 @@ export function VaultView({
     setFilters({ categoryId: null, tagIds: [], fileKinds: [], archived: false });
   };
 
-  return (
-    <div className="space-y-4">
-      {!hideControls && (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search title, description, filename…"
-              className="pl-9"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              data-vault-search
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-                className="focus-ring absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-accent"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
+  const docCount =
+    !isLoading && documents ? documents.length : null;
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant={favoritesOnly ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFavoritesOnly((v) => !v)}
-              aria-pressed={favoritesOnly}
-              aria-label="Favorites"
-            >
-              <Star
-                className={cn(
-                  "h-3.5 w-3.5",
-                  favoritesOnly && "fill-primary-foreground",
-                )}
+  return (
+    <div className="space-y-3">
+      {!hideControls && (
+        <>
+          {/* Toolbar row */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative w-full sm:max-w-sm">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search title, description, filename…"
+                className="pl-9"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                data-vault-search
               />
-              <span className="hidden sm:inline">Favorites</span>
-            </Button>
-            <VaultFilters
-              value={filters}
-              onChange={setFilters}
-              sort={sort}
-              onSortChange={setSort}
-            />
-            <VaultSortDropdown sort={sort} onChange={setSort} />
-            <div className="hidden items-center rounded-md border border-border sm:flex">
-              <button
-                type="button"
-                onClick={() => setView("grid")}
-                aria-pressed={view === "grid"}
-                aria-label="Grid view"
-                className={cn(
-                  "focus-ring flex h-8 w-8 items-center justify-center rounded-l-md text-muted-foreground",
-                  view === "grid" && "bg-secondary text-foreground",
-                )}
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                  className="focus-ring absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-accent"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant={favoritesOnly ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFavoritesOnly((v) => !v)}
+                aria-pressed={favoritesOnly}
+                aria-label="Favorites"
               >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("list")}
-                aria-pressed={view === "list"}
-                aria-label="List view"
-                className={cn(
-                  "focus-ring flex h-8 w-8 items-center justify-center rounded-r-md text-muted-foreground",
-                  view === "list" && "bg-secondary text-foreground",
-                )}
-              >
-                <List className="h-4 w-4" />
-              </button>
+                <Star
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    favoritesOnly && "fill-primary-foreground",
+                  )}
+                />
+                <span className="hidden sm:inline">Favorites</span>
+              </Button>
+              <VaultFilters
+                value={filters}
+                onChange={setFilters}
+                sort={sort}
+                onSortChange={setSort}
+              />
+              <VaultSortDropdown sort={sort} onChange={setSort} />
+              <div className="hidden items-center rounded-md border border-border sm:flex">
+                <button
+                  type="button"
+                  onClick={() => setView("grid")}
+                  aria-pressed={view === "grid"}
+                  aria-label="Grid view"
+                  className={cn(
+                    "focus-ring flex h-8 w-8 items-center justify-center rounded-l-md text-muted-foreground",
+                    view === "grid" && "bg-secondary text-foreground",
+                  )}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("list")}
+                  aria-pressed={view === "list"}
+                  aria-label="List view"
+                  className={cn(
+                    "focus-ring flex h-8 w-8 items-center justify-center rounded-r-md text-muted-foreground",
+                    view === "list" && "bg-secondary text-foreground",
+                  )}
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Category quick-strip */}
+          <CategoryStrip
+            selectedId={filters.categoryId}
+            onChange={(id) => setFilters((f) => ({ ...f, categoryId: id }))}
+          />
+
+          {/* Active filter chips + document count */}
+          <ActiveFilterBar
+            filters={filters}
+            favoritesOnly={favoritesOnly}
+            query={query}
+            categories={categories}
+            tags={tags}
+            docCount={docCount}
+            onChangeFilters={setFilters}
+            onChangeFavoritesOnly={setFavoritesOnly}
+            onChangeQuery={setQuery}
+            onClearAll={clearAll}
+          />
+        </>
       )}
 
       {isLoading ? (

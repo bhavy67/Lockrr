@@ -1,8 +1,9 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpDown, Filter, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
-import type { DocumentFilters, DocumentSort } from "@lockkaro/types";
+import type { Category, DocumentSort, Tag } from "@lockkaro/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -50,6 +51,8 @@ interface FiltersProps {
   onSortChange: (s: DocumentSort) => void;
 }
 
+// ─── Sort dropdown ────────────────────────────────────────────────────────────
+
 export function VaultSortDropdown({
   sort,
   onChange,
@@ -83,15 +86,17 @@ export function VaultSortDropdown({
   );
 }
 
+// ─── Filter trigger (popover / sheet) ─────────────────────────────────────────
+// Category is handled externally via the quick-strip; this popover covers
+// tags, file type, and archived.
+
 export function VaultFilters(props: FiltersProps) {
   const activeCount = countActive(props.value);
   return (
     <>
-      {/* Mobile: sheet */}
       <div className="md:hidden">
         <MobileFilterSheet {...props} activeCount={activeCount} />
       </div>
-      {/* Desktop: popover */}
       <div className="hidden md:block">
         <DesktopFilterPopover {...props} activeCount={activeCount} />
       </div>
@@ -101,7 +106,6 @@ export function VaultFilters(props: FiltersProps) {
 
 function countActive(v: FilterState): number {
   let n = 0;
-  if (v.categoryId) n++;
   if (v.tagIds.length) n++;
   if (v.fileKinds.length) n++;
   if (v.archived) n++;
@@ -118,7 +122,7 @@ function DesktopFilterPopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant={activeCount > 0 ? "secondary" : "outline"}
           size="sm"
           aria-label={
             activeCount ? `${activeCount} filters active` : "Open filters"
@@ -133,7 +137,7 @@ function DesktopFilterPopover({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-72 p-0" align="end">
         <FilterBody value={value} onChange={onChange} />
       </PopoverContent>
     </Popover>
@@ -150,7 +154,7 @@ function MobileFilterSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
-          variant="outline"
+          variant={activeCount > 0 ? "secondary" : "outline"}
           size="sm"
           aria-label={
             activeCount ? `${activeCount} filters active` : "Open filters"
@@ -183,39 +187,14 @@ function FilterBody({
   value: FilterState;
   onChange: (v: FilterState) => void;
 }) {
-  const { data: categories = [] } = useCategories();
   const { data: tags = [] } = useTags();
 
   const clearAll = () =>
-    onChange({ categoryId: null, tagIds: [], fileKinds: [], archived: false });
+    onChange({ ...value, tagIds: [], fileKinds: [], archived: false });
 
   return (
     <div>
       <div className="max-h-[60vh] space-y-5 overflow-y-auto p-4 md:max-h-none">
-        <FilterSection title="Category">
-          <div className="flex flex-wrap gap-1.5">
-            <Chip
-              label="Any"
-              active={!value.categoryId}
-              onClick={() => onChange({ ...value, categoryId: null })}
-            />
-            {categories.map((c) => (
-              <Chip
-                key={c.id}
-                label={c.name}
-                dot={c.color}
-                active={value.categoryId === c.id}
-                onClick={() =>
-                  onChange({
-                    ...value,
-                    categoryId: value.categoryId === c.id ? null : c.id,
-                  })
-                }
-              />
-            ))}
-          </div>
-        </FilterSection>
-
         {tags.length > 0 && (
           <FilterSection title="Tags">
             <div className="flex flex-wrap gap-1.5">
@@ -286,6 +265,221 @@ function FilterBody({
     </div>
   );
 }
+
+// ─── Category quick-strip ────────────────────────────────────────────────────
+
+export function CategoryStrip({
+  selectedId,
+  onChange,
+}: {
+  selectedId: string | null;
+  onChange: (id: string | null) => void;
+}) {
+  const { data: categories = [] } = useCategories();
+  if (categories.length === 0) return null;
+
+  return (
+    <div className="-mx-0.5 flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+      <CategoryChip
+        label="All"
+        active={!selectedId}
+        onClick={() => onChange(null)}
+      />
+      {categories.map((c) => (
+        <CategoryChip
+          key={c.id}
+          label={c.name}
+          dot={c.color}
+          active={selectedId === c.id}
+          onClick={() => onChange(selectedId === c.id ? null : c.id)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function CategoryChip({
+  label,
+  active,
+  onClick,
+  dot,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  dot?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "focus-ring inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap transition-colors",
+        active
+          ? "border-primary/40 bg-primary/10 text-foreground"
+          : "border-border bg-background text-muted-foreground hover:border-border hover:text-foreground",
+      )}
+    >
+      {dot && (
+        <span
+          className="h-1.5 w-1.5 rounded-full"
+          style={{ background: dot }}
+          aria-hidden
+        />
+      )}
+      {label}
+    </button>
+  );
+}
+
+// ─── Active filter chip bar ──────────────────────────────────────────────────
+
+interface ActiveFilterBarProps {
+  filters: FilterState;
+  favoritesOnly: boolean;
+  query: string;
+  categories: Category[];
+  tags: Tag[];
+  docCount: number | null;
+  onChangeFilters: (f: FilterState) => void;
+  onChangeFavoritesOnly: (v: boolean) => void;
+  onChangeQuery: (q: string) => void;
+  onClearAll: () => void;
+}
+
+export function ActiveFilterBar({
+  filters,
+  favoritesOnly,
+  query,
+  categories,
+  tags,
+  docCount,
+  onChangeFilters,
+  onChangeFavoritesOnly,
+  onChangeQuery,
+  onClearAll,
+}: ActiveFilterBarProps) {
+  const chips: Array<{ key: string; label: string; dot?: string; onRemove: () => void }> = [];
+
+  if (query.trim()) {
+    chips.push({
+      key: "query",
+      label: `"${query.trim()}"`,
+      onRemove: () => onChangeQuery(""),
+    });
+  }
+  if (favoritesOnly) {
+    chips.push({
+      key: "favorites",
+      label: "Favorites",
+      onRemove: () => onChangeFavoritesOnly(false),
+    });
+  }
+  if (filters.categoryId) {
+    const cat = categories.find((c) => c.id === filters.categoryId);
+    chips.push({
+      key: "category",
+      label: cat?.name ?? "Category",
+      dot: cat?.color,
+      onRemove: () => onChangeFilters({ ...filters, categoryId: null }),
+    });
+  }
+  for (const tagId of filters.tagIds) {
+    const tag = tags.find((t) => t.id === tagId);
+    if (tag) {
+      chips.push({
+        key: `tag-${tagId}`,
+        label: tag.name,
+        dot: tag.color,
+        onRemove: () =>
+          onChangeFilters({
+            ...filters,
+            tagIds: filters.tagIds.filter((id) => id !== tagId),
+          }),
+      });
+    }
+  }
+  for (const kind of filters.fileKinds) {
+    chips.push({
+      key: `kind-${kind}`,
+      label: kind === "pdf" ? "PDF" : "Images",
+      onRemove: () =>
+        onChangeFilters({
+          ...filters,
+          fileKinds: filters.fileKinds.filter((k) => k !== kind),
+        }),
+    });
+  }
+  if (filters.archived) {
+    chips.push({
+      key: "archived",
+      label: "Archived",
+      onRemove: () => onChangeFilters({ ...filters, archived: false }),
+    });
+  }
+
+  const hasChips = chips.length > 0;
+  const showBar = hasChips || docCount !== null;
+
+  if (!showBar) return null;
+
+  return (
+    <AnimatePresence initial={false}>
+      <motion.div
+        key="filter-bar"
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: "auto" }}
+        exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.15 }}
+        className="flex flex-wrap items-center gap-x-3 gap-y-1.5 overflow-hidden"
+      >
+        {hasChips && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {chips.map((chip) => (
+              <span
+                key={chip.key}
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 py-0.5 pl-2 pr-1 text-xs text-foreground"
+              >
+                {chip.dot && (
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ background: chip.dot }}
+                    aria-hidden
+                  />
+                )}
+                {chip.label}
+                <button
+                  type="button"
+                  onClick={chip.onRemove}
+                  aria-label={`Remove ${chip.label} filter`}
+                  className="focus-ring ml-0.5 rounded-full p-0.5 text-muted-foreground hover:bg-border hover:text-foreground"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </button>
+              </span>
+            ))}
+            <button
+              type="button"
+              onClick={onClearAll}
+              className="focus-ring rounded px-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
+        {docCount !== null && (
+          <p className="ml-auto text-xs text-muted-foreground">
+            {docCount} {docCount === 1 ? "document" : "documents"}
+            {hasChips ? " found" : ""}
+          </p>
+        )}
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+// ─── Shared internals ────────────────────────────────────────────────────────
 
 function FilterSection({
   title,

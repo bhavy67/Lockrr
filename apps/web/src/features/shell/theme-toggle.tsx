@@ -16,6 +16,13 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // Render a placeholder with identical dimensions until we know the theme.
+  // next-themes resolves the theme client-side, so comparing theme === id
+  // during hydration causes a server/client mismatch in React 19.
+  if (!mounted) {
+    return <div className="h-7 rounded-md bg-muted/60 p-1" />;
+  }
+
   return (
     <div className="flex items-center gap-1 rounded-md bg-muted/60 p-1">
       {themes.map(({ id, Icon, label }) => (
@@ -26,7 +33,7 @@ export function ThemeToggle() {
           onClick={() => setTheme(id)}
           className={cn(
             "focus-ring flex flex-1 items-center justify-center rounded py-1 text-xs transition-colors",
-            mounted && theme === id
+            theme === id
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground",
           )}
