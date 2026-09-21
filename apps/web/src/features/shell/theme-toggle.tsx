@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const themes = [
@@ -11,18 +11,8 @@ const themes = [
   { id: "system" as const, Icon: Monitor, label: "System" },
 ];
 
-export function ThemeToggle() {
+function ThemeToggleImpl() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  // Render a placeholder with identical dimensions until we know the theme.
-  // next-themes resolves the theme client-side, so comparing theme === id
-  // during hydration causes a server/client mismatch in React 19.
-  if (!mounted) {
-    return <div className="h-7 rounded-md bg-muted/60 p-1" />;
-  }
-
   return (
     <div className="flex items-center gap-1 rounded-md bg-muted/60 p-1">
       {themes.map(({ id, Icon, label }) => (
@@ -44,3 +34,14 @@ export function ThemeToggle() {
     </div>
   );
 }
+
+// Never server-render this component — the theme comes from localStorage so
+// the server can't know it. The loading fallback keeps the same height so
+// the sidebar doesn't shift when the toggle mounts.
+export const ThemeToggle = dynamic(
+  () => Promise.resolve({ default: ThemeToggleImpl }),
+  {
+    ssr: false,
+    loading: () => <div className="h-7 rounded-md bg-muted/60" />,
+  },
+);
