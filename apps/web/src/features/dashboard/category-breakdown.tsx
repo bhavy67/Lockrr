@@ -1,10 +1,10 @@
 "use client";
 
+import { FolderOpen } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
-import { EmptyState } from "@/components/ui/empty-state";
-import { FolderOpen } from "lucide-react";
 import type { Category, DocumentRecord } from "@lockkaro/types";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -21,7 +21,7 @@ export function CategoryBreakdown({ categories, documents }: Props) {
       else uncategorized++;
     }
     const total = documents.length || 1;
-    const rows = categories
+    const result = categories
       .map((c) => ({
         id: c.id,
         name: c.name,
@@ -34,15 +34,15 @@ export function CategoryBreakdown({ categories, documents }: Props) {
       .slice(0, 5);
 
     if (uncategorized > 0) {
-      rows.push({
+      result.push({
         id: "uncategorized",
         name: "Uncategorized",
-        color: "#71717A",
+        color: "#a8a29e",
         count: uncategorized,
         pct: Math.round((uncategorized / total) * 100),
       });
     }
-    return rows;
+    return result;
   }, [categories, documents]);
 
   if (rows.length === 0) {
@@ -84,14 +84,14 @@ function BreakdownRow({
           <span className="truncate text-sm font-medium text-foreground">
             {row.name}
           </span>
-          <span className="ml-2 text-xs text-muted-foreground">
-            {row.count} · {row.pct}%
+          <span className="ml-2 shrink-0 text-xs text-muted-foreground">
+            {row.count}
           </span>
         </div>
-        <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
+        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
             className="h-full rounded-full transition-[width] duration-500 ease-out"
-            style={{ width: `${Math.max(2, row.pct)}%`, background: row.color }}
+            style={{ width: `${Math.max(3, row.pct)}%`, background: row.color }}
           />
         </div>
       </div>
@@ -100,14 +100,14 @@ function BreakdownRow({
 
   return isReal ? (
     <Link
-      href={`/vault?category=${row.id}`}
+      href="/vault"
       className={cn(
-        "focus-ring block rounded-md px-1 py-0.5 transition-colors hover:bg-surface",
+        "focus-ring block rounded-lg px-1.5 py-1 transition-colors hover:bg-muted/50",
       )}
     >
       {inner}
     </Link>
   ) : (
-    <div className="px-1 py-0.5">{inner}</div>
+    <div className="px-1.5 py-1">{inner}</div>
   );
 }

@@ -57,8 +57,9 @@ export async function exportVault(): Promise<void> {
   const files = await getAllFiles();
   const filesFolder = zip.folder("files")!;
   for (const [path, blob] of files) {
-    const safeName = path.replace(/\//g, "_");
-    filesFolder.file(safeName, blob);
+    // JSZip treats slashes as folder separators, so the path is preserved
+    // exactly as stored in IndexedDB — no encoding needed.
+    filesFolder.file(path, blob);
   }
 
   const content = await zip.generateAsync({ type: "blob" });
@@ -108,8 +109,8 @@ export async function importVault(file: File): Promise<number> {
     await Promise.all(
       fileEntries.map(async (entry) => {
         const blob = await entry.async("blob");
-        // Restore path: safeName was path.replace(/\//g, "_")
-        const originalPath = entry.name.replace(/^files\//, "").replace(/_/g, "/");
+        // Strip the "files/" prefix; the rest is the original storagePath.
+        const originalPath = entry.name.replace(/^files\//, "");
         await putFile(originalPath, blob);
       }),
     );

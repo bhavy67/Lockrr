@@ -24,21 +24,21 @@ export function StatCard({
   tint = "primary",
 }: Props) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-subtle sm:p-5">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-subtle sm:p-5">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
         <span
           className={cn(
-            "flex h-7 w-7 items-center justify-center rounded-md",
+            "flex h-9 w-9 items-center justify-center rounded-lg",
             tintMap[tint],
           )}
         >
-          <Icon className="h-3.5 w-3.5" />
+          <Icon className="h-4 w-4" />
         </span>
       </div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+      <div className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
         {value}
       </div>
       {hint && (

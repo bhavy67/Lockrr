@@ -2,7 +2,6 @@
 
 import { differenceInCalendarDays, formatDistanceToNow, startOfMonth } from "date-fns";
 import {
-  Archive,
   CalendarClock,
   Database,
   FileText,
@@ -55,17 +54,11 @@ export function DashboardView() {
       if (s === "soon") expiring++;
       if (new Date(d.createdAt).getTime() >= monthStart) thisMonth++;
     }
-    return {
-      total: docs.length,
-      expiring,
-      expired,
-      favorites,
-      bytes,
-      thisMonth,
-    };
+    return { total: docs.length, expiring, expired, favorites, bytes, thisMonth };
   }, [allDocs]);
 
   const recent = useMemo(() => (allDocs ?? []).slice(0, 5), [allDocs]);
+
   const expiringSoon = useMemo(
     () =>
       (allDocs ?? [])
@@ -76,8 +69,7 @@ export function DashboardView() {
         )
         .sort(
           (a, b) =>
-            new Date(a.expiryDate!).getTime() -
-            new Date(b.expiryDate!).getTime(),
+            new Date(a.expiryDate!).getTime() - new Date(b.expiryDate!).getTime(),
         )
         .slice(0, 5),
     [allDocs],
@@ -93,6 +85,7 @@ export function DashboardView() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      {/* Header */}
       <header className="mb-6 flex flex-col justify-between gap-3 sm:mb-8 sm:flex-row sm:items-end">
         <div>
           <p className="text-sm text-muted-foreground">{greeting},</p>
@@ -106,10 +99,11 @@ export function DashboardView() {
         </Button>
       </header>
 
+      {/* Stat cards */}
       {isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24" />
+            <Skeleton key={i} className="h-28 rounded-xl" />
           ))}
         </div>
       ) : (
@@ -157,20 +151,21 @@ export function DashboardView() {
         </section>
       )}
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      {/* Main content grid */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+
+        {/* Recently added */}
         <section className="min-w-0">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground">
-              Recently added
-            </h2>
+            <h2 className="text-sm font-semibold text-foreground">Recently added</h2>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/vault">View all</Link>
             </Button>
           </div>
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-14 w-full" />
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
               ))}
             </div>
           ) : recent.length === 0 ? (
@@ -178,12 +173,10 @@ export function DashboardView() {
               icon={UploadCloud}
               title="Your vault is empty."
               description="Upload your first important document to see it here."
-              action={
-                <Button onClick={() => openUpload()}>Upload document</Button>
-              }
+              action={<Button onClick={() => openUpload()}>Upload document</Button>}
             />
           ) : (
-            <div className="space-y-1 rounded-lg border border-border bg-card p-1">
+            <div className="space-y-0.5 rounded-xl border border-border bg-card p-1.5 shadow-subtle">
               {recent.map((d) => (
                 <DocumentRow
                   key={d.id}
@@ -195,29 +188,33 @@ export function DashboardView() {
           )}
         </section>
 
+        {/* Sidebar panels */}
         <aside className="min-w-0 space-y-6">
+
+          {/* Watch dates */}
           <section>
-            <h2 className="mb-3 text-sm font-semibold text-foreground">
-              Watch dates
-            </h2>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground">Watch dates</h2>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/reminders">View all</Link>
+              </Button>
+            </div>
             {expiringSoon.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border bg-surface/50 p-5 text-center text-xs text-muted-foreground">
+              <div className="rounded-xl border border-dashed border-border p-5 text-center text-xs text-muted-foreground">
                 Nothing expiring in the next 60 days.
               </div>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-1.5">
                 {expiringSoon.map((d) => (
                   <li key={d.id}>
                     <Link
                       href={`/vault/${d.id}`}
-                      className="focus-ring flex items-center gap-3 rounded-md border border-border bg-card p-2.5 hover:border-primary/30"
+                      className="focus-ring flex items-center gap-3 rounded-xl border border-border bg-card p-2.5 transition-colors hover:border-primary/30 hover:bg-card"
                     >
-                      <Archive className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <CalendarClock className="h-4 w-4 shrink-0 text-muted-foreground" />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {d.title}
-                        </p>
-                        <div className="mt-1">
+                        <p className="truncate text-sm font-medium">{d.title}</p>
+                        <div className="mt-0.5">
                           <ExpiryBadge document={d} compact />
                         </div>
                       </div>
@@ -228,14 +225,13 @@ export function DashboardView() {
             )}
           </section>
 
+          {/* By category */}
           <section>
-            <h2 className="mb-3 text-sm font-semibold text-foreground">
-              By category
-            </h2>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">By category</h2>
             {isLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-8" />
+                  <Skeleton key={i} className="h-8 rounded-lg" />
                 ))}
               </div>
             ) : (
@@ -246,27 +242,26 @@ export function DashboardView() {
             )}
           </section>
 
+          {/* Recent activity */}
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground">
-                Recent activity
-              </h2>
+              <h2 className="text-sm font-semibold text-foreground">Recent activity</h2>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/timeline">Timeline</Link>
               </Button>
             </div>
             {!activity || activity.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border bg-surface/50 p-5 text-center text-xs text-muted-foreground">
+              <div className="rounded-xl border border-dashed border-border p-5 text-center text-xs text-muted-foreground">
                 Actions will appear here as you upload and organize.
               </div>
             ) : (
-              <ul className="space-y-2 text-xs">
+              <ul className="space-y-2.5 text-xs">
                 {activity.slice(0, 6).map((a) => (
                   <li
                     key={a.id}
-                    className="flex items-start justify-between gap-3 border-b border-border/50 pb-2 last:border-b-0"
+                    className="flex items-start justify-between gap-3 border-b border-border/50 pb-2.5 last:border-b-0 last:pb-0"
                   >
-                    <span className="min-w-0 text-muted-foreground">
+                    <span className="min-w-0 leading-relaxed text-muted-foreground">
                       {describeActivity(a.kind)}{" "}
                       {typeof a.payload.title === "string" && (
                         <span className="font-medium text-foreground">
@@ -274,10 +269,8 @@ export function DashboardView() {
                         </span>
                       )}
                     </span>
-                    <span className="shrink-0 whitespace-nowrap font-mono text-[10px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(a.createdAt), {
-                        addSuffix: true,
-                      })}
+                    <span className="shrink-0 whitespace-nowrap font-mono text-[10px] text-muted-foreground/70">
+                      {formatDistanceToNow(new Date(a.createdAt), { addSuffix: true })}
                     </span>
                   </li>
                 ))}
@@ -292,25 +285,15 @@ export function DashboardView() {
 
 function describeActivity(kind: string): string {
   switch (kind) {
-    case "document.uploaded":
-      return "Uploaded";
-    case "document.updated":
-      return "Updated";
-    case "document.deleted":
-      return "Deleted";
-    case "document.favorited":
-      return "Favorited";
-    case "document.unfavorited":
-      return "Unfavorited";
-    case "document.archived":
-      return "Archived";
-    case "document.restored":
-      return "Restored";
-    case "collection.created":
-      return "Created collection";
-    case "tag.created":
-      return "Created tag";
-    default:
-      return kind;
+    case "document.uploaded":   return "Uploaded";
+    case "document.updated":    return "Updated";
+    case "document.deleted":    return "Deleted";
+    case "document.favorited":  return "Favourited";
+    case "document.unfavorited":return "Unfavourited";
+    case "document.archived":   return "Archived";
+    case "document.restored":   return "Restored";
+    case "collection.created":  return "Created collection";
+    case "tag.created":         return "Created tag";
+    default:                    return kind;
   }
 }
