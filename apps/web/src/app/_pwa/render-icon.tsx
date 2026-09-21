@@ -18,13 +18,10 @@ export function renderLockPng({
   size: number;
   maskable?: boolean;
 }): ImageResponse {
-  // Maskable icons keep a 20% safe zone on every side. Regular icons fill the
-  // whole tile because the browser doesn't crop them further.
   const inset = maskable ? size * 0.2 : 0;
   const artSize = size - inset * 2;
   const radius = maskable ? 0 : size * 0.22;
 
-  // Lock geometry proportions match /icon.svg exactly, just scaled up.
   const shackleStroke = artSize * 0.083;
   const bodyPad = artSize * 0.281;
   const bodyTop = artSize * 0.4375;
@@ -37,7 +34,7 @@ export function renderLockPng({
         style={{
           width: size,
           height: size,
-          background: "#4F46E5",
+          background: "#F59E0B",
           borderRadius: radius,
           display: "flex",
           alignItems: "center",
@@ -65,7 +62,7 @@ export function renderLockPng({
             rx={2.4}
             fill="#ffffff"
           />
-          <circle cx={16} cy={19.5} r={1.7} fill="#4F46E5" />
+          <circle cx={16} cy={19.5} r={1.7} fill="#F59E0B" />
         </svg>
       </div>
     ),

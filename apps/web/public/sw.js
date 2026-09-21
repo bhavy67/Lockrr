@@ -1,17 +1,13 @@
 // LockKaro service worker.
 //
-// Strategy in one sentence: cache the app shell so the app opens fast (and
-// falls back gracefully when offline), but never serve stale data from
-// Supabase or /api routes.
+// Strategy:
+//   - HTML pages       → network-first, fall back to /offline.html if offline
+//   - Static JS/CSS/fonts/icons → cache-first, updated in background
+//   - /api/* and POST/PUT/DELETE → network-only (never cached)
 //
-//   - HTML pages  → network-first, fall back to /offline.html if offline
-//   - Static JS/CSS/fonts/icons → cache-first, updated in the background
-//   - Supabase and /api/* → network-only (never cached)
-//
-// Bump CACHE_VERSION when the service worker itself changes shape. The old
-// caches will be dropped in `activate`.
+// Bump CACHE_VERSION when the service worker itself changes shape.
 
-const CACHE_VERSION = "lockkaro-v3";
+const CACHE_VERSION = "lockkaro-v4";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
@@ -24,8 +20,6 @@ self.addEventListener("install", (event) => {
     (async () => {
       const cache = await caches.open(APP_SHELL_CACHE);
       await cache.addAll(APP_SHELL);
-      // Activate this worker as soon as it's installed — no need to wait for
-      // the user to close every tab first.
       await self.skipWaiting();
     })(),
   );
@@ -49,23 +43,13 @@ self.addEventListener("activate", (event) => {
 
 // -------- fetch --------
 
-/**
- * Should this request bypass the cache entirely?
- *
- * Supabase calls, /api/*, POST/PUT/DELETE requests, and anything with an
- * Authorization header must always hit the network — the cache would leak
- * one user's data to another, or serve stale writes.
- */
 function bypassCache(request) {
   if (request.method !== "GET") return true;
   const url = new URL(request.url);
-  if (url.hostname.endsWith(".supabase.co")) return true;
   if (url.pathname.startsWith("/api/")) return true;
-  if (url.pathname.startsWith("/auth/")) return true;
   return false;
 }
 
-/** Is this an HTML navigation? */
 function isNavigation(request) {
   return (
     request.mode === "navigate" ||
@@ -74,7 +58,6 @@ function isNavigation(request) {
   );
 }
 
-/** Is this a static asset we can safely serve from cache? */
 function isStatic(url) {
   return (
     url.pathname.startsWith("/_next/static/") ||
@@ -90,15 +73,13 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   if (bypassCache(request)) return;
-  // Ignore cross-origin requests we don't own — let the browser handle them.
   if (url.origin !== self.location.origin) return;
 
   if (isNavigation(request)) {
     event.respondWith(
       (async () => {
         try {
-          const network = await fetch(request);
-          return network;
+          return await fetch(request);
         } catch {
           const cache = await caches.open(APP_SHELL_CACHE);
           const offline = await cache.match("/offline.html");
@@ -128,6 +109,4 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
-
-  // Everything else: just let the network handle it.
 });

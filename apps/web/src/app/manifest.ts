@@ -20,8 +20,8 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     orientation: "portrait",
     // Match the app's actual background so the splash screen doesn't flash white.
-    background_color: "#0a0a0b",
-    theme_color: "#4F46E5",
+    background_color: "#0f0b03",
+    theme_color: "#F59E0B",
     categories: ["productivity", "utilities", "business"],
     icons: [
       {

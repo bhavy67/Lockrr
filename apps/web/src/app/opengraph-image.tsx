@@ -1,16 +1,5 @@
 import { ImageResponse } from "next/og";
 
-/**
- * Dynamic OG image. Next.js runs this at build/request time and serves the
- * result as /opengraph-image at 1200×630. No external font is required —
- * ImageResponse falls back to the platform sans-serif, which is fine at OG
- * sizes.
- *
- * Design: dark gradient stage with the brand mark top-left, tagline
- * ("Lock it. Clock it.") as the hero, and a bilingual subhead. The two
- * lines of the tagline stack vertically to preserve the beat pattern.
- */
-
 export const runtime = "edge";
 export const alt = "LockKaro — Lock it. Clock it.";
 export const size = { width: 1200, height: 630 };
@@ -28,7 +17,7 @@ export default function OpengraphImage() {
           justifyContent: "space-between",
           padding: 80,
           background:
-            "linear-gradient(135deg, #0a0a0b 0%, #1a1a2e 60%, #2b2570 100%)",
+            "linear-gradient(135deg, #0f0b03 0%, #1c1000 55%, #3d2000 100%)",
           fontFamily: "sans-serif",
           color: "white",
         }}
@@ -40,7 +29,7 @@ export default function OpengraphImage() {
               width: 76,
               height: 76,
               borderRadius: 17,
-              background: "#4F46E5",
+              background: "#F59E0B",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -67,7 +56,7 @@ export default function OpengraphImage() {
                 rx={2.4}
                 fill="#ffffff"
               />
-              <circle cx={16} cy={19.5} r={1.7} fill="#4F46E5" />
+              <circle cx={16} cy={19.5} r={1.7} fill="#F59E0B" />
             </svg>
           </div>
           <div
@@ -95,7 +84,7 @@ export default function OpengraphImage() {
             }}
           >
             <span>Lock it.</span>
-            <span style={{ color: "#A5B4FC" }}>Clock it.</span>
+            <span style={{ color: "#FCD34D" }}>Clock it.</span>
           </div>
           <div
             style={{
@@ -117,7 +106,7 @@ export default function OpengraphImage() {
               width: 10,
               height: 10,
               borderRadius: 999,
-              background: "#22C55E",
+              background: "#F59E0B",
             }}
           />
           <div
