@@ -1,7 +1,9 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AlertTriangle, Database, Download, HardDrive, Upload } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,7 @@ import {
 import { PhoneSettings } from "./phone-settings";
 
 export function SettingsView() {
+  const queryClient = useQueryClient();
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -68,8 +71,9 @@ export function SettingsView() {
     try {
       const count = await importVault(pendingFile);
       toast.success(`Vault restored. ${count} document${count !== 1 ? "s" : ""} imported.`);
-      // Reload so queries refresh
-      window.location.reload();
+      // Refetch everything rather than reload the page: inside the native app
+      // a reload of /settings boots the landing page (see CLAUDE.md #15).
+      await queryClient.invalidateQueries();
     } catch (err) {
       toast.error("Import failed. " + String(err));
     } finally {
@@ -216,7 +220,16 @@ export function SettingsView() {
           </div>
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Version</dt>
-            <dd className="text-foreground">0.3.0</dd>
+            {/* Keep in step with versionName in android/app/build.gradle. */}
+            <dd className="text-foreground">1.0.0</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">Privacy</dt>
+            <dd>
+              <Link href="/privacy" className="text-primary underline-offset-4 hover:underline">
+                Privacy policy
+              </Link>
+            </dd>
           </div>
         </dl>
       </section>

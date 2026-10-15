@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -253,7 +254,10 @@ export default function WelcomePage() {
       {/* Footer */}
       <footer className="border-t border-border/60 px-6 py-4">
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} LockKaro. Your documents, your control.
+          © {new Date().getFullYear()} LockKaro. Your documents, your control. ·{" "}
+          <Link href="/privacy" className="underline-offset-4 hover:text-foreground hover:underline">
+            Privacy
+          </Link>
         </p>
       </footer>
     </div>
