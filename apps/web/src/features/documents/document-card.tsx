@@ -10,6 +10,7 @@ import { cn, formatBytes } from "@/lib/utils";
 import { DocumentActionsMenu } from "./document-actions";
 import { DocumentThumbnail } from "./document-thumbnail";
 import { ExpiryBadge } from "./expiry-badge";
+import { documentHref } from "@/lib/routes";
 
 interface Props {
   document: DocumentRecord;
@@ -19,7 +20,7 @@ interface Props {
 export function DocumentCard({ document: doc, category }: Props) {
   return (
     <Link
-      href={`/vault/${doc.id}`}
+      href={documentHref(doc.id)}
       className={cn(
         "focus-ring group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200",
         "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-elevated",

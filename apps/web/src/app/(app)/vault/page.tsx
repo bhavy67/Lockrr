@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
 import { Plus } from "lucide-react";
+import { Suspense } from "react";
 import { PageHeader } from "@/features/shell/page-header";
 import { UploadCta } from "@/features/upload/upload-cta";
-import { VaultView } from "@/features/documents/vault-view";
+import { VaultRoute } from "@/features/documents/vault-view";
 
 export const metadata: Metadata = { title: "Vault" };
 
-interface Props {
-  searchParams: Promise<{ category?: string; favorites?: string }>;
-}
-
-export default async function VaultPage({ searchParams }: Props) {
-  const params = await searchParams;
+export default function VaultPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
@@ -24,12 +20,9 @@ export default async function VaultPage({ searchParams }: Props) {
           </UploadCta>
         }
       />
-      <VaultView
-        initialFilters={{
-          categoryId: params.category ?? undefined,
-          favoritesOnly: params.favorites === "1",
-        }}
-      />
+      <Suspense>
+        <VaultRoute />
+      </Suspense>
     </div>
   );
 }

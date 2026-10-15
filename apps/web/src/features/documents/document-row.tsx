@@ -9,6 +9,7 @@ import { cn, formatBytes } from "@/lib/utils";
 import { DocumentActionsMenu } from "./document-actions";
 import { DocumentIcon } from "./document-icon";
 import { ExpiryBadge } from "./expiry-badge";
+import { documentHref } from "@/lib/routes";
 
 interface Props {
   document: DocumentRecord;
@@ -20,7 +21,7 @@ export function DocumentRow({ document: doc, category, tags }: Props) {
   const shownTags = tags?.filter((t) => doc.tagIds.includes(t.id)).slice(0, 2) ?? [];
   return (
     <Link
-      href={`/vault/${doc.id}`}
+      href={documentHref(doc.id)}
       className={cn(
         "focus-ring group flex items-center gap-3 rounded-md border border-transparent px-3 py-2.5 transition-colors",
         "hover:border-border hover:bg-surface",

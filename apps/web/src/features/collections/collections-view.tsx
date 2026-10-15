@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDocuments } from "@/features/documents/hooks";
 import { CollectionFormDialog } from "./collection-form-dialog";
 import { useCollections } from "./hooks";
+import { collectionHref } from "@/lib/routes";
 
 export function CollectionsView() {
   const { data: collections, isLoading } = useCollections();
@@ -67,7 +68,7 @@ export function CollectionsView() {
             return (
               <Link
                 key={c.id}
-                href={`/collections/${c.id}`}
+                href={collectionHref(c.id)}
                 className="focus-ring group flex min-w-0 flex-col justify-between rounded-lg border border-border bg-card p-5 shadow-subtle transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated"
               >
                 <div className="flex items-start gap-3">

@@ -16,6 +16,7 @@ import {
 } from "@/features/documents/expiry";
 import { useCategories, useDocuments } from "@/features/documents/hooks";
 import { formatBytes } from "@/lib/utils";
+import { documentHref } from "@/lib/routes";
 
 type Bucket = "soon" | "later" | "expired" | "all";
 
@@ -221,7 +222,7 @@ function ReminderRow({
 
   return (
     <Link
-      href={`/vault/${doc.id}`}
+      href={documentHref(doc.id)}
       className="focus-ring flex items-center gap-3 rounded-md border border-border bg-card p-3 transition-colors hover:border-primary/30"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted">

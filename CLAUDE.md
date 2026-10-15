@@ -317,6 +317,21 @@ the first time a real user signed up. Set Site URL to the real origin and add
 allow list is right this is correct automatically in every environment on
 it — but the allow list itself has no code-side substitute.
 
+### 14. The app is a static export (`output: "export"`)
+
+The same `out/` folder is deployed to Vercel and bundled into the Capacitor
+app, so nothing may need a server at request time:
+
+- **No `[id]` routes.** Ids exist only on the device, so there's nothing to
+  pre-render. Detail pages take `?id=` — always build links with
+  `documentHref` / `collectionHref` from `lib/routes.ts`.
+- **No `searchParams` in server components.** Read them client-side with
+  `useSearchParams()` inside a `<Suspense>` (see `VaultRoute`).
+- **Metadata routes and route handlers need `dynamic = "force-static"`**, and
+  no `runtime = "edge"`.
+- **Headers live in `apps/web/vercel.json`**; `headers()` in `next.config` is
+  ignored by a static export.
+
 ---
 
 ## Phase 6 — what shipped

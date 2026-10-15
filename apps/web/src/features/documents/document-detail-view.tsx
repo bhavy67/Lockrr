@@ -9,7 +9,7 @@ import {
   Star,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,12 @@ import { PdfPreview } from "@/features/preview/pdf-preview";
 
 interface Props {
   documentId: string;
+}
+
+/** Reads the id from `?id=` — see `lib/routes.ts` for why it isn't a path segment. */
+export function DocumentDetailRoute() {
+  const id = useSearchParams().get("id") ?? "";
+  return <DocumentDetailView key={id} documentId={id} />;
 }
 
 export function DocumentDetailView({ documentId }: Props) {

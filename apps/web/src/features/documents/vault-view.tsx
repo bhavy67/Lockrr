@@ -1,6 +1,7 @@
 "use client";
 
 import { FolderOpen, LayoutGrid, List, Search, Star, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { DocumentFilters, DocumentSort, DocumentView } from "@lockkaro/types";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,19 @@ interface VaultViewProps {
   emptyTitle?: string;
   emptyDescription?: string;
   hideControls?: boolean;
+}
+
+/** `/vault?category=…&favorites=1` — read on the client because the app is a static export. */
+export function VaultRoute() {
+  const params = useSearchParams();
+  const category = params.get("category") ?? undefined;
+  const favoritesOnly = params.get("favorites") === "1";
+  return (
+    <VaultView
+      key={params.toString()}
+      initialFilters={{ categoryId: category, favoritesOnly }}
+    />
+  );
 }
 
 export function VaultView({

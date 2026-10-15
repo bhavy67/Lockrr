@@ -26,6 +26,7 @@ import {
 import { formatBytes } from "@/lib/utils";
 import { CategoryBreakdown } from "./category-breakdown";
 import { StatCard } from "./stat-card";
+import { documentHref } from "@/lib/routes";
 
 export function DashboardView() {
   const { data: allDocs, isLoading } = useDocuments();
@@ -208,7 +209,7 @@ export function DashboardView() {
                 {expiringSoon.map((d) => (
                   <li key={d.id}>
                     <Link
-                      href={`/vault/${d.id}`}
+                      href={documentHref(d.id)}
                       className="focus-ring flex items-center gap-3 rounded-xl border border-border bg-card p-2.5 transition-colors hover:border-primary/30 hover:bg-card"
                     >
                       <CalendarClock className="h-4 w-4 shrink-0 text-muted-foreground" />

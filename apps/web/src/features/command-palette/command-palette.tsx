@@ -31,6 +31,7 @@ import { useDocuments } from "@/features/documents/hooks";
 import { useUploadDialog } from "@/features/upload/upload-dialog-store";
 import { useDebounced } from "@/lib/hooks/use-debounced";
 import { useCommandPalette } from "./command-palette-store";
+import { documentHref, collectionHref } from "@/lib/routes";
 
 export function CommandPalette() {
   const open = useCommandPalette((s) => s.open);
@@ -180,7 +181,7 @@ export function CommandPalette() {
                   <CommandItem
                     key={d.id}
                     value={`doc-${d.id}-${d.title}-${d.fileName}`}
-                    onSelect={() => run(() => router.push(`/vault/${d.id}`))}
+                    onSelect={() => run(() => router.push(documentHref(d.id)))}
                   >
                     <FileText
                       className={
@@ -213,7 +214,7 @@ export function CommandPalette() {
                   key={c.id}
                   value={`col-${c.id}-${c.name}`}
                   onSelect={() =>
-                    run(() => router.push(`/collections/${c.id}`))
+                    run(() => router.push(collectionHref(c.id)))
                   }
                 >
                   <span

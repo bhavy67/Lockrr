@@ -2,7 +2,7 @@
 
 import { ArrowLeft, FileWarning, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,12 @@ import { useCollection, useDeleteCollection } from "./hooks";
 
 interface Props {
   collectionId: string;
+}
+
+/** Reads the id from `?id=` — see `lib/routes.ts` for why it isn't a path segment. */
+export function CollectionDetailRoute() {
+  const id = useSearchParams().get("id") ?? "";
+  return <CollectionDetailView key={id} collectionId={id} />;
 }
 
 export function CollectionDetailView({ collectionId }: Props) {

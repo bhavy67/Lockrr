@@ -32,6 +32,7 @@ import {
   type TimelineEvent,
   type TimelineEventKind,
 } from "./timeline-data";
+import { documentHref } from "@/lib/routes";
 
 interface EventStyle {
   icon: LucideIcon;
@@ -221,7 +222,7 @@ function TimelineRow({ event }: { event: TimelineEvent }) {
   if (event.documentId && event.kind !== "deleted") {
     return (
       <Link
-        href={`/vault/${event.documentId}`}
+        href={documentHref(event.documentId)}
         className="focus-ring block rounded-md"
       >
         {inner}
