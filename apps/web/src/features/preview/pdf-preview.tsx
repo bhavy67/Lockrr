@@ -1,9 +1,10 @@
 "use client";
 
 import { AlertCircle, Download, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { nativeLinkHandler } from "@/lib/save-file";
+import { PdfPages } from "./pdf-pages";
 
 interface Props {
   url: string;
@@ -12,21 +13,27 @@ interface Props {
 
 export function PdfPreview({ url, fileName }: Props) {
   const [failed, setFailed] = useState(false);
+  const fail = useCallback(() => setFailed(true), []);
+  // Only mounted once the blob URL exists, i.e. on the client — safe to read
+  // navigator during render. False in Android's WebView and mobile Chrome.
+  const [hasViewer] = useState(() => navigator.pdfViewerEnabled !== false);
 
   return (
     <div className="relative h-full w-full">
-      {!failed ? (
+      {failed ? (
+        <PdfFallback url={url} fileName={fileName} />
+      ) : !hasViewer ? (
+        <PdfPages url={url} fileName={fileName} onError={fail} />
+      ) : (
         <object
           data={`${url}#toolbar=0&navpanes=0`}
           type="application/pdf"
           className="h-full w-full rounded-md bg-muted"
-          onError={() => setFailed(true)}
+          onError={fail}
           aria-label={`Preview of ${fileName}`}
         >
           <PdfFallback url={url} fileName={fileName} />
         </object>
-      ) : (
-        <PdfFallback url={url} fileName={fileName} />
       )}
     </div>
   );

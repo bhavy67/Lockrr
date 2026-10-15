@@ -217,9 +217,12 @@ If you get `EADDRINUSE`, kill the offender: `lsof -ti:3000 | xargs kill -9`.
 
 Toasts are styled via `classNames` in `providers.tsx` — do not add another Toaster instance elsewhere.
 
-### 6. PDF preview via `<object>`
+### 6. PDF preview: `<object>` where there's a viewer, PDF.js canvases where not
 
-We deliberately use the browser's native PDF viewer via `<object>` (not `react-pdf`) to keep the bundle small. If Phase 7 needs OCR / annotation / page thumbnails, switch to PDF.js at that point.
+Desktop browsers get their native viewer via `<object>`. Where
+`navigator.pdfViewerEnabled === false` — Android's WebView (so the native app)
+and mobile Chrome — `features/preview/pdf-pages.tsx` draws pages to canvases
+with the same lazily-loaded pdf.js used for text extraction. No `react-pdf`.
 
 ### 7. Supabase upload progress needs XHR
 

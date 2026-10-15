@@ -18,7 +18,7 @@ import {
  */
 let workerConfigured = false;
 
-async function loadPdfjs() {
+export async function loadPdfjs() {
   const pdfjs = await import("pdfjs-dist");
   if (!workerConfigured) {
     pdfjs.GlobalWorkerOptions.workerSrc = new URL(
