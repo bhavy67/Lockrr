@@ -332,6 +332,27 @@ app, so nothing may need a server at request time:
 - **Headers live in `apps/web/vercel.json`**; `headers()` in `next.config` is
   ignored by a static export.
 
+### 15. Native app (Capacitor) — storage and files
+
+`apps/web/android` + `apps/web/ios`, app id `in.bhavyladani.lockkaro` (permanent
+after the first store upload). `pnpm cap:sync` = build + copy `out/` into both.
+
+- **Never write localStorage directly** — use `kvSet` from `lib/data/native.ts`.
+  On native, the OS may wipe WebView storage, so every write is mirrored to
+  the app's data dir and restored at boot; a raw `setItem` won't survive that.
+- File blobs on native go to `files/…` in the data dir (`mock-storage.ts`
+  delegates); IndexedDB is web-only.
+- `data.*` waits for the restore on native (Proxy in `lib/data/index.ts`).
+  Code that reads localStorage *outside* `data` at mount must `await restored`.
+- **Never `<a download>` or `target="_blank"` on a blob URL** — both do nothing
+  in a WebView. Use `saveFile` / `nativeLinkHandler` from `lib/save-file.ts`
+  (share sheet on native, plain download on web).
+- Don't branch rendered output on `isNative` — the HTML is prerendered with it
+  `false`, so it's a hydration mismatch on the phone. Branch in handlers/effects.
+- The native servers map any extensionless path to the root `index.html`, so a
+  hard reload on `/vault/doc` boots the landing page (which then redirects to
+  `/vault`). Client-side navigation is unaffected.
+
 ---
 
 ## Phase 6 — what shipped

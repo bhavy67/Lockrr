@@ -27,6 +27,7 @@ import { useCategories, useDocument, useDocumentUrl, useUpdateDocument } from ".
 import { useDocumentText, useIsExtracting } from "@/features/extraction/hooks";
 import { ImagePreview } from "@/features/preview/image-preview";
 import { PdfPreview } from "@/features/preview/pdf-preview";
+import { nativeLinkHandler, saveFile } from "@/lib/save-file";
 
 interface Props {
   documentId: string;
@@ -91,12 +92,7 @@ export function DocumentDetailView({ documentId }: Props) {
 
   const download = async () => {
     if (!url) return;
-    const a = window.document.createElement("a");
-    a.href = url;
-    a.download = doc.fileName;
-    window.document.body.appendChild(a);
-    a.click();
-    a.remove();
+    await saveFile(url, doc.fileName);
     toast.success("Download started.");
   };
 
@@ -135,7 +131,12 @@ export function DocumentDetailView({ documentId }: Props) {
           </Button>
           {url && (
             <Button variant="ghost" size="icon-sm" asChild aria-label="Open in new tab">
-              <a href={url} target="_blank" rel="noreferrer">
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                onClick={nativeLinkHandler(url, doc.fileName)}
+              >
                 <ExternalLink />
               </a>
             </Button>

@@ -16,6 +16,7 @@ import {
 import { LogoMark, Wordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/features/shell/theme-toggle";
+import { kvSet, restored } from "@/lib/data/native";
 
 const features = [
   {
@@ -78,15 +79,14 @@ export default function WelcomePage() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("lk.onboarded")) {
-      router.replace("/vault");
-    } else {
-      setChecked(true);
-    }
+    void restored.then(() => {
+      if (localStorage.getItem("lk.onboarded")) router.replace("/vault");
+      else setChecked(true);
+    });
   }, [router]);
 
   const openVault = () => {
-    localStorage.setItem("lk.onboarded", "true");
+    kvSet("lk.onboarded", "true");
     router.push("/vault");
   };
 

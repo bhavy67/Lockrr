@@ -1,7 +1,16 @@
 /**
  * Tiny IndexedDB wrapper for storing document file blobs.
  * Kept intentionally minimal — one object store, key = storagePath.
+ * Inside the native app each call goes to the app's data directory instead.
  */
+
+import {
+  isNative,
+  nativeDeleteFile,
+  nativeGetAllFiles,
+  nativeGetFile,
+  nativePutFile,
+} from "./native";
 
 const DB_NAME = "lockerr-files";
 const STORE = "files";
@@ -34,20 +43,24 @@ async function withStore<T>(
 }
 
 export async function putFile(key: string, blob: Blob): Promise<void> {
+  if (isNative) return nativePutFile(key, blob);
   await withStore("readwrite", (s) => s.put(blob, key));
 }
 
 export async function getFile(key: string): Promise<Blob | null> {
+  if (isNative) return nativeGetFile(key);
   const val = await withStore<Blob | undefined>("readonly", (s) => s.get(key));
   return val ?? null;
 }
 
 export async function deleteFile(key: string): Promise<void> {
+  if (isNative) return nativeDeleteFile(key);
   await withStore("readwrite", (s) => s.delete(key));
 }
 
 /** Returns all stored files as a Map<storagePath, Blob>. Used by backup. */
 export async function getAllFiles(): Promise<Map<string, Blob>> {
+  if (isNative) return nativeGetAllFiles();
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, "readonly");

@@ -203,7 +203,7 @@ export function SettingsView() {
         <dl className="space-y-2 text-xs">
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Storage</dt>
-            <dd className="text-foreground">Your browser (localStorage + IndexedDB)</dd>
+            <dd className="text-foreground">On this device only</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Account</dt>

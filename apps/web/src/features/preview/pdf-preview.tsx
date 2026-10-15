@@ -3,6 +3,7 @@
 import { AlertCircle, Download, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { nativeLinkHandler } from "@/lib/save-file";
 
 interface Props {
   url: string;
@@ -43,12 +44,17 @@ function PdfFallback({ url, fileName }: { url: string; fileName: string }) {
       </div>
       <div className="flex gap-2">
         <Button variant="outline" size="sm" asChild>
-          <a href={url} target="_blank" rel="noreferrer">
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            onClick={nativeLinkHandler(url, fileName)}
+          >
             <ExternalLink className="h-3.5 w-3.5" /> Open
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href={url} download={fileName}>
+          <a href={url} download={fileName} onClick={nativeLinkHandler(url, fileName)}>
             <Download className="h-3.5 w-3.5" /> Download
           </a>
         </Button>

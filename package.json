@@ -8,6 +8,7 @@
     "dev": "pnpm --filter @lockkaro/web dev",
     "build": "pnpm --filter @lockkaro/web build",
     "start": "pnpm --filter @lockkaro/web start",
+    "cap:sync": "pnpm --filter @lockkaro/web cap:sync",
     "lint": "pnpm --filter @lockkaro/web lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm --filter @lockkaro/web test",

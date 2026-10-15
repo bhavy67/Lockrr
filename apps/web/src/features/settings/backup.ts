@@ -1,6 +1,8 @@
 import JSZip from "jszip";
 import type { Category, Collection, DocumentRecord, DocumentText, Tag } from "@lockkaro/types";
 import { getAllFiles, putFile } from "@/lib/data/mock-storage";
+import { kvSet } from "@/lib/data/native";
+import { saveFile } from "@/lib/save-file";
 
 // Mirrors the KEYS object in mock-client.ts
 const LS_KEYS = {
@@ -64,20 +66,15 @@ export async function exportVault(): Promise<void> {
 
   const content = await zip.generateAsync({ type: "blob" });
   const date = new Date().toISOString().slice(0, 10);
-  const url = URL.createObjectURL(content);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `lockkaro-backup-${date}.zip`;
-  a.click();
-  URL.revokeObjectURL(url);
+  await saveFile(content, `lockkaro-backup-${date}.zip`);
 
-  localStorage.setItem("lk.lastBackup", new Date().toISOString());
+  kvSet("lk.lastBackup", new Date().toISOString());
 }
 
 export async function importVault(file: File): Promise<number> {
   const uid = getDeviceId() || (() => {
     const id = crypto.randomUUID();
-    localStorage.setItem(LS_KEYS.deviceId, id);
+    kvSet(LS_KEYS.deviceId, id);
     return id;
   })();
 
@@ -94,12 +91,12 @@ export async function importVault(file: File): Promise<number> {
 
   const docs = rewrite(meta.documents);
 
-  localStorage.setItem(LS_KEYS.categories(uid), JSON.stringify(rewrite(meta.categories)));
-  localStorage.setItem(LS_KEYS.tags(uid), JSON.stringify(rewrite(meta.tags)));
-  localStorage.setItem(LS_KEYS.collections(uid), JSON.stringify(rewrite(meta.collections)));
-  localStorage.setItem(LS_KEYS.documents(uid), JSON.stringify(docs));
+  kvSet(LS_KEYS.categories(uid), JSON.stringify(rewrite(meta.categories)));
+  kvSet(LS_KEYS.tags(uid), JSON.stringify(rewrite(meta.tags)));
+  kvSet(LS_KEYS.collections(uid), JSON.stringify(rewrite(meta.collections)));
+  kvSet(LS_KEYS.documents(uid), JSON.stringify(docs));
   if (meta.documentTexts) {
-    localStorage.setItem(LS_KEYS.documentTexts(uid), JSON.stringify(meta.documentTexts));
+    kvSet(LS_KEYS.documentTexts(uid), JSON.stringify(meta.documentTexts));
   }
 
   // Restore file blobs

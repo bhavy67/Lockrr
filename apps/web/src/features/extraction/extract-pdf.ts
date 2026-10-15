@@ -9,9 +9,9 @@ import {
 /**
  * Extract embedded text from a PDF using pdf.js.
  *
- * The worker is loaded from unpkg once and cached by the browser. This keeps
- * the app bundle small (pdf.worker.min.mjs is ~1 MB) and avoids fiddling with
- * webpack config to serve the worker as a static asset.
+ * The worker (~1 MB) is emitted by webpack as its own static file and only
+ * fetched the first time a PDF is read — so it works offline and inside the
+ * native app, and always matches the library version.
  *
  * Scanned PDFs (no embedded text) return `status: "empty"`. OCR-of-PDF-pages
  * ships in Phase 7.5, when we render each page to a canvas and run Tesseract.
@@ -21,9 +21,10 @@ let workerConfigured = false;
 async function loadPdfjs() {
   const pdfjs = await import("pdfjs-dist");
   if (!workerConfigured) {
-    // The worker version has to match the library version exactly or pdf.js
-    // refuses to start with "The API version does not match the Worker version".
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+      "pdfjs-dist/build/pdf.worker.min.mjs",
+      import.meta.url,
+    ).toString();
     workerConfigured = true;
   }
   return pdfjs;

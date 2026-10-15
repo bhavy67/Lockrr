@@ -36,6 +36,7 @@ import {
 import { useCollections } from "@/features/collections/hooks";
 import { data } from "@/lib/data";
 import { useDeleteDocument, useUpdateDocument } from "./hooks";
+import { saveFile } from "@/lib/save-file";
 
 interface Props {
   document: DocumentRecord;
@@ -72,12 +73,7 @@ export function DocumentActionsMenu({ document: doc, align = "end" }: Props) {
       // Not getDocumentUrl: that one renders inline. This one arrives as an
       // attachment named after the original file, whichever data mode is on.
       const url = await data.getDocumentDownloadUrl(doc.id);
-      const a = window.document.createElement("a");
-      a.href = url;
-      a.download = doc.fileName;
-      window.document.body.appendChild(a);
-      a.click();
-      a.remove();
+      await saveFile(url, doc.fileName);
       if (url.startsWith("blob:")) {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       }

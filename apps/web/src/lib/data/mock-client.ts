@@ -16,6 +16,7 @@ import type {
 import { sanitizeFileName, sleep, stripExtension } from "@/lib/utils";
 import type { DataClient, SaveDocumentTextInput, UploadInput } from "./client";
 import { deleteFile, getFile, putFile } from "./mock-storage";
+import { kvSet } from "./native";
 
 // localStorage key prefix preserved intentionally — changing it would silently
 // erase existing data for anyone who has used the app before.
@@ -45,7 +46,7 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 function write<T>(key: string, value: T): void {
-  ls()?.setItem(key, JSON.stringify(value));
+  if (ls()) kvSet(key, JSON.stringify(value));
 }
 
 // -------- utilities --------
@@ -93,7 +94,7 @@ function getDeviceId(): string {
   let id = s.getItem(KEYS.deviceId);
   if (!id) {
     id = uuid();
-    s.setItem(KEYS.deviceId, id);
+    kvSet(KEYS.deviceId, id);
     // First-ever visit: seed default categories and empty collections.
     write(KEYS.categories(id), seedCategoriesFor(id));
     write(KEYS.tags(id), []);
@@ -455,7 +456,8 @@ class MockDataClient implements DataClient {
     if (!doc) throw new Error("Document not found");
     const blob = await getFile(doc.storagePath);
     if (!blob) throw new Error("File missing from local storage");
-    return URL.createObjectURL(blob);
+    // Native storage hands back untyped bytes; previews need the real type.
+    return URL.createObjectURL(new Blob([blob], { type: doc.mimeType }));
   }
 
   /**
