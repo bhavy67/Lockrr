@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { isNative } from "@/lib/data/native";
 
 /**
  * Tracks whether the app is installable on this platform, and exposes a
@@ -44,8 +45,8 @@ export function usePwaInstall(): UsePwaInstall {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Already installed → hide the button.
-    if (isStandalone()) {
+    // Already installed (or the native app) → hide the button.
+    if (isNative || isStandalone()) {
       setStatus("installed");
       return;
     }

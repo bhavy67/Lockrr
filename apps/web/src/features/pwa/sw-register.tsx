@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
+import { isNative } from "@/lib/data/native";
 
 /**
  * Registers the service worker once, after hydration.
  *
  * - Skipped entirely in development (`next dev`) so hot-reload isn't fighting
  *   a stale cached shell every save.
+ * - Skipped inside the native app: every file is already on the device, and a
+ *   cache-first worker would only risk serving stale chunks after an update.
  * - Skipped when the browser doesn't ship service workers (older Safari, some
  *   embedded webviews). The app still works, it just isn't installable.
  */
 export function ServiceWorkerRegister() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") return;
+    if (process.env.NODE_ENV !== "production" || isNative) return;
     if (typeof window === "undefined") return;
     if (!("serviceWorker" in navigator)) return;
 

@@ -37,7 +37,7 @@ const features = [
   {
     icon: ShieldCheck,
     title: "Private by design",
-    body: "Your files live in your browser — nothing is uploaded, nothing is shared.",
+    body: "Your files live on your device — nothing is uploaded, nothing is shared.",
   },
 ];
 
@@ -131,7 +131,7 @@ export default function WelcomePage() {
             </h1>
             <p className="mx-auto mt-5 max-w-md text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               A calm, private place for the paperwork of your life. Everything
-              stays in your browser — no account, no server, no surprises.
+              stays on your device — no account, no server, no surprises.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3">

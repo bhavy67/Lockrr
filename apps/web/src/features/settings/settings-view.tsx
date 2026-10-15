@@ -181,7 +181,7 @@ export function SettingsView() {
             <div>
               <h2 className="text-sm font-semibold text-foreground">Storage</h2>
               <p className="text-xs text-muted-foreground">
-                Browser storage used by your vault.
+                Storage used by your vault on this device.
               </p>
             </div>
           </div>

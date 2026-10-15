@@ -89,7 +89,7 @@ export function DocumentContentTab({ document: doc }: Props) {
           />
         )}
         <p className="text-xs text-muted-foreground">
-          This runs in your browser — nothing is sent to a server.
+          This runs on your device — nothing is sent to a server.
         </p>
       </div>
     );

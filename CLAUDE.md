@@ -337,6 +337,14 @@ app, so nothing may need a server at request time:
 `apps/web/android` + `apps/web/ios`, app id `in.bhavyladani.lockkaro` (permanent
 after the first store upload). `pnpm cap:sync` = build + copy `out/` into both.
 
+Android builds without Android Studio: Homebrew `openjdk@21` +
+`android-commandlinetools` (SDK at `/opt/homebrew/share/android-commandlinetools`,
+emulator AVD `lockkaro`). `cd apps/web/android && ./gradlew assembleDebug`.
+Debug builds expose the WebView to DevTools; Playwright's `_android` API can
+drive it (pick the page whose body has text — Capacitor exposes an empty one
+too). Icons/splash are generated from `apps/web/assets/` with
+`npx @capacitor/assets generate --android`.
+
 - **Never write localStorage directly** — use `kvSet` from `lib/data/native.ts`.
   On native, the OS may wipe WebView storage, so every write is mirrored to
   the app's data dir and restored at boot; a raw `setItem` won't survive that.
