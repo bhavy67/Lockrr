@@ -360,6 +360,15 @@ too). Icons/splash are generated from `apps/web/assets/` with
   (share sheet on native, plain download on web).
 - Don't branch rendered output on `isNative` — the HTML is prerendered with it
   `false`, so it's a hydration mismatch on the phone. Branch in handlers/effects.
+- **App lock** (`features/security`) is a convenience gate, not encryption.
+  It re-locks only after `GRACE_MS` (30 s) in the background, because the
+  share sheet and the biometric prompt itself also pause the activity. Reset
+  the "left at" time on every return, or the prompt re-locks the vault after a
+  successful unlock (bug hit and fixed during Phase 4).
+- **Expiry reminders** (`features/reminders/notifications.ts`) must pass
+  `isExactNotification: false`. The plugin defaults to exact alarms and,
+  lacking `SCHEDULE_EXACT_ALARM` (removed from the manifest on purpose), sends
+  the user to the "Alarms & reminders" settings page and hangs `schedule()`.
 - The native servers map any extensionless path to the root `index.html`, so a
   hard reload on `/vault/doc` boots the landing page (which then redirects to
   `/vault`). Client-side navigation is unaffected.

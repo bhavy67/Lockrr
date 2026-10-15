@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { isNative } from "@/lib/data/native";
 import { formatBytes } from "@/lib/utils";
 import {
   exportVault,
@@ -22,6 +23,7 @@ import {
   getStorageEstimate,
   importVault,
 } from "./backup";
+import { PhoneSettings } from "./phone-settings";
 
 export function SettingsView() {
   const [exporting, setExporting] = useState(false);
@@ -34,7 +36,8 @@ export function SettingsView() {
 
   useEffect(() => {
     setLastBackup(getLastBackupDate());
-    getStorageEstimate().then(setStorage);
+    // In the app, documents live outside the WebView; its estimate would mislead.
+    if (!isNative) getStorageEstimate().then(setStorage);
   }, []);
 
   const handleExport = async () => {
@@ -170,6 +173,8 @@ export function SettingsView() {
           />
         </div>
       </section>
+
+      <PhoneSettings />
 
       {/* Storage usage */}
       {storage && (

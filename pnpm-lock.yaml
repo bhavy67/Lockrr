@@ -10,6 +10,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@capacitor-community/privacy-screen':
+        specifier: ^8.0.0
+        version: 8.0.0(@capacitor/core@8.5.3)
       '@capacitor/android':
         specifier: ^8.5.3
         version: 8.5.3(@capacitor/core@8.5.3)
@@ -25,9 +28,15 @@ importers:
       '@capacitor/ios':
         specifier: ^8.5.3
         version: 8.5.3(@capacitor/core@8.5.3)
+      '@capacitor/local-notifications':
+        specifier: ^8.3.1
+        version: 8.3.1(@capacitor/core@8.5.3)
       '@capacitor/share':
         specifier: ^8.0.3
         version: 8.0.3(@capacitor/core@8.5.3)
+      '@capgo/capacitor-native-biometric':
+        specifier: 8.8.2
+        version: 8.8.2(@capacitor/core@8.5.3)
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.86.0(react@19.2.8))
@@ -308,6 +317,11 @@ packages:
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
 
+  '@capacitor-community/privacy-screen@8.0.0':
+    resolution: {integrity: sha512-XcBTgQ13BdH8xB7arJ2io5rP3aEXcndgDVl/GdFRNwc8TatnV+1U6rGROLtepYLA4Rl0GP7k4zAeykcG+a//3w==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
   '@capacitor/android@8.5.3':
     resolution: {integrity: sha512-ilH4gSSz3DrketMkzDVAvY9JsWJ//rCQnECLTdcFRO7xXDogwAbUvQAnIAbiqefwV/D1xfjEL4Gw1MJXEcaA9g==}
     peerDependencies:
@@ -336,6 +350,11 @@ packages:
     peerDependencies:
       '@capacitor/core': ^8.5.0
 
+  '@capacitor/local-notifications@8.3.1':
+    resolution: {integrity: sha512-F7zu/+p/mIR958YP4axOkeI5hBKRaXDyYjbNPrAil2wWfd7OxScPSTvP9t85NpQ0eULVRu0/sntoxOg6ck477A==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
   '@capacitor/share@8.0.3':
     resolution: {integrity: sha512-gnvZBV1NPu2B8vd1UKncR56G15ueHd0aZLqgDov++t3SmTBG9Q0VrAZ1VnHn5stxlmglVaTb4RwopMgbpLzroA==}
     peerDependencies:
@@ -343,6 +362,11 @@ packages:
 
   '@capacitor/synapse@1.0.4':
     resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
+
+  '@capgo/capacitor-native-biometric@8.8.2':
+    resolution: {integrity: sha512-JjzQyVi0h0yMsl+XkSl4qOnKc05V74X/6DunuPpPPitYl1lgAm66TPZF2ITp7S+A7AiYxnwJh7NRSUGTRFDwKA==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -3917,6 +3941,10 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
+  '@capacitor-community/privacy-screen@8.0.0(@capacitor/core@8.5.3)':
+    dependencies:
+      '@capacitor/core': 8.5.3
+
   '@capacitor/android@8.5.3(@capacitor/core@8.5.3)':
     dependencies:
       '@capacitor/core': 8.5.3
@@ -3961,11 +3989,19 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.3
 
+  '@capacitor/local-notifications@8.3.1(@capacitor/core@8.5.3)':
+    dependencies:
+      '@capacitor/core': 8.5.3
+
   '@capacitor/share@8.0.3(@capacitor/core@8.5.3)':
     dependencies:
       '@capacitor/core': 8.5.3
 
   '@capacitor/synapse@1.0.4': {}
+
+  '@capgo/capacitor-native-biometric@8.8.2(@capacitor/core@8.5.3)':
+    dependencies:
+      '@capacitor/core': 8.5.3
 
   '@emnapi/core@1.10.0':
     dependencies:

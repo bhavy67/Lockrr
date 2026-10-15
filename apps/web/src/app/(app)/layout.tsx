@@ -3,13 +3,15 @@ import { SkipLink } from "@/components/skip-link";
 import { CommandPalette } from "@/features/command-palette/command-palette";
 import { ShortcutsMount } from "@/features/command-palette/shortcuts-mount";
 import { ExtractionQueueMount } from "@/features/extraction/queue-mount";
+import { RemindersMount } from "@/features/reminders/reminders-mount";
+import { LockGate } from "@/features/security/lock-gate";
 import { MobileBottomNav, MobileTopBar } from "@/features/shell/mobile-nav";
 import { Sidebar } from "@/features/shell/sidebar";
 import { UploadDialog } from "@/features/upload/upload-dialog";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <LockGate>
       <SkipLink />
       <div className="flex min-h-svh">
         <Sidebar />
@@ -25,6 +27,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <CommandPalette />
       <ShortcutsMount />
       <ExtractionQueueMount />
-    </>
+      <RemindersMount />
+    </LockGate>
   );
 }
