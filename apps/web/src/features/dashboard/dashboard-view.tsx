@@ -10,7 +10,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -76,12 +76,14 @@ export function DashboardView() {
     [allDocs],
   );
 
-  const greeting = useMemo(() => {
+  // Set after mount: the page is prerendered at build time, so a greeting
+  // computed during render would carry the build server's clock.
+  const [greeting, setGreeting] = useState<string | null>(null);
+  useEffect(() => {
     const h = new Date().getHours();
-    if (h < 5) return "Working late";
-    if (h < 12) return "Good morning";
-    if (h < 18) return "Good afternoon";
-    return "Good evening";
+    setGreeting(
+      h < 5 ? "Working late" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening",
+    );
   }, []);
 
   return (
@@ -89,7 +91,7 @@ export function DashboardView() {
       {/* Header */}
       <header className="mb-6 flex flex-col justify-between gap-3 sm:mb-8 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm text-muted-foreground">{greeting},</p>
+          <p className="text-sm text-muted-foreground">{greeting ? `${greeting},` : "\u00a0"}</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             Your vault.
           </h1>
