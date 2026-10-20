@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Capacitor reads each plugin's permission list from its @CapacitorPlugin /
+# @Permission annotations at runtime. R8 full mode (AGP 8 default) drops
+# annotation data unless the annotation types themselves are kept, and its
+# bundled rules don't. Symptom without this: checkPermissions() resolves
+# empty and requestPermissions() hangs with no dialog (release builds only).
+-keepattributes RuntimeVisibleAnnotations,AnnotationDefault
+-keep @interface com.getcapacitor.annotation.** { *; }

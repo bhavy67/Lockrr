@@ -369,6 +369,14 @@ too). Icons/splash are generated from `apps/web/assets/` with
   `isExactNotification: false`. The plugin defaults to exact alarms and,
   lacking `SCHEDULE_EXACT_ALARM` (removed from the manifest on purpose), sends
   the user to the "Alarms & reminders" settings page and hangs `schedule()`.
+- **Release builds run R8** (`minifyEnabled true`; Play flags unobfuscated
+  DEX). R8 bugs only exist in release, so test every plugin on a signed
+  release APK. `app/proguard-rules.pro` must keep
+  `@interface com.getcapacitor.annotation.**`: without it R8 full mode drops
+  the `@CapacitorPlugin(permissions=…)` data, `checkPermissions()` resolves
+  empty and `requestPermissions()` hangs with no dialog (hit in 1.0.1).
+  The emulator's system image enables WebView debugging for all apps, so
+  Playwright's `_android` can drive release builds there too.
 - The native servers map any extensionless path to the root `index.html`, so a
   hard reload on `/vault/doc` boots the landing page (which then redirects to
   `/vault`). Client-side navigation is unaffected.

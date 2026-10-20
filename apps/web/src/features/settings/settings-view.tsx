@@ -221,7 +221,7 @@ export function SettingsView() {
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Version</dt>
             {/* Keep in step with versionName in android/app/build.gradle. */}
-            <dd className="text-foreground">1.0.0</dd>
+            <dd className="text-foreground">1.0.1</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Privacy</dt>
